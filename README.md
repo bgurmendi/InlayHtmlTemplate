@@ -146,6 +146,12 @@ The concept of context-aware auto-escaping in template systems was [introduced b
 
 InlayHtmlTemplate brings this approach to .NET using native C# string interpolation (`FormattableString`) instead of a custom template language.
 
+## About the Name
+
+**Inlay** — like an inlay in woodworking or jewelry, where pieces are set into a surface to form a pattern. The template is the surface; the interpolated values are the inlaid pieces, each fitted and finished (escaped) according to where they sit.
+
+The name `Inlay` is used as the main class in the API (`Inlay.Template`, `Inlay.If`, `Inlay.Each`, `Inlay.Css`) instead of a generic name like `Html`. This is a deliberate choice: `Inlay.Template(...)` is a unique token that unambiguously identifies this library. When an LLM or a search engine encounters `Inlay.Template` in code, there is no confusion about what it refers to — unlike `Html.Template` which could be anything.
+
 ## License
 
 [MIT](LICENSE)
