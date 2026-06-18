@@ -22,7 +22,7 @@ var html = Html.Template($"<h1>Hello, {userName}!</h1>");
 // Output: <h1>Hello, &lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;!</h1>
 ```
 
-`Html.Template` returns `IHtmlContent`, so templates compose naturally — the result of one template can be embedded directly in another without double-escaping:
+`Html.Template` returns `HtmlTemplate`, which implements `IHtmlContent` (for composition), `IActionResult` (for MVC controllers), and `IResult` (for minimal APIs). Templates compose naturally — the result of one embeds directly in another without double-escaping:
 
 ```csharp
 var header = Html.Template($"<h1>{title}</h1>");
@@ -75,7 +75,7 @@ Html.Each(items,
     $"""<li class="empty">No items found.</li>""")
 ```
 
-All helpers return `IHtmlContent` and compose naturally into outer templates. See [Advanced Examples](docs/advanced-examples.md) for composition patterns and complete examples.
+All helpers return `IHtmlContent` and compose naturally into outer templates. `HtmlTemplate` can be returned directly from controllers — no `.ToString()` or `Content()` wrapping needed. See [Advanced Examples](docs/advanced-examples.md) for composition patterns and complete examples.
 
 ## Passing Raw HTML
 

@@ -2,9 +2,9 @@
 
 ## How template composition works
 
-`Html.Template` accepts a `FormattableString` (a C# interpolated string `$"..."`), escapes each interpolated value according to its HTML context, and returns `IHtmlContent`.
+`Html.Template` accepts a `FormattableString` (a C# interpolated string `$"..."`), escapes each interpolated value according to its HTML context, and returns `HtmlTemplate`.
 
-The key to composition: **`IHtmlContent` values inside a template are inserted as-is, without escaping.** Since `Html.Template` returns `IHtmlContent`, templates compose naturally:
+The key to composition: **`IHtmlContent` values inside a template are inserted as-is, without escaping.** Since `Html.Template` returns `HtmlTemplate` (which implements `IHtmlContent`), templates compose naturally:
 
 ```csharp
 var item = "Bread & butter";
@@ -15,7 +15,7 @@ var result = Html.Template($"<ul>{li}</ul>");
 // result contains: <ul><li>Bread &amp; butter</li></ul>    ← no double-escaping
 ```
 
-No wrapping, no `Html.Raw`, no `HtmlString` — just embed one template result inside another. This works because `Html.Template` returns `IHtmlContent`, and the engine knows not to re-escape it.
+No wrapping, no `Html.Raw`, no `HtmlString` — just embed one template result inside another. This works because `HtmlTemplate` implements `IHtmlContent`, and the engine knows not to re-escape it.
 
 By contrast, a plain `string` is always escaped (safe by default):
 
@@ -31,16 +31,16 @@ Html.Template($"<p>{userInput}</p>");
 
 ### Building reusable components
 
-The natural pattern is functions that return `IHtmlContent`:
+The natural pattern is functions that return `HtmlTemplate`:
 
 ```csharp
-IHtmlContent RenderBadge(string role) =>
+HtmlTemplate RenderBadge(string role) =>
     Html.Template($"""<span class="badge">{role}</span>""");
 
-IHtmlContent RenderCard(string name, string role) =>
+HtmlTemplate RenderCard(string name, string role) =>
     Html.Template($"""<div class="card"><h3>{name}</h3>{RenderBadge(role)}</div>""");
 
-// Nesting is automatic — RenderBadge returns IHtmlContent, so it composes
+// Nesting is automatic — RenderBadge returns HtmlTemplate (IHtmlContent), so it composes
 var html = Html.Template($"<section>{RenderCard("Alice", "Admin")}</section>");
 ```
 
@@ -284,7 +284,7 @@ This example combines all the helpers in a realistic scenario:
 record User(string Name, string Role, string AvatarUrl);
 record Activity(string Description, DateTime When, bool IsRead);
 
-IHtmlContent RenderDashboard(User user, IEnumerable<Activity> activities)
+HtmlTemplate RenderDashboard(User user, IEnumerable<Activity> activities)
 {
     var isAdmin = user.Role == "Admin";
 

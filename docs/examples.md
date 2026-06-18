@@ -7,7 +7,7 @@ using AspNetTemplates;
 
 public static class PageLayout
 {
-    public static IHtmlContent Render(string title, IHtmlContent bodyContent)
+    public static HtmlTemplate Render(string title, IHtmlContent bodyContent)
     {
         return Html.Template($"""
             <!DOCTYPE html>
@@ -55,13 +55,13 @@ Each value is escaped according to its position:
 
 ## Composing Templates
 
-Since `Html.Template` returns `IHtmlContent`, the result of one template embeds directly in another — no wrapping needed:
+Since `Html.Template` returns `HtmlTemplate`, the result of one template embeds directly in another — no wrapping needed:
 
 ```csharp
-IHtmlContent RenderListItem(string text) =>
+HtmlTemplate RenderListItem(string text) =>
     Html.Template($"<li>{text}</li>");
 
-IHtmlContent RenderList(IEnumerable<string> items)
+HtmlTemplate RenderList(IEnumerable<string> items)
 {
     var listItems = Html.Each(items, item => $"<li>{item}</li>");
     return Html.Template($"<ul>{listItems}</ul>");
@@ -74,7 +74,7 @@ var html = RenderList(new[] { "First", "<script>xss</script>", "Third" });
 ## Dynamic Table from Data
 
 ```csharp
-IHtmlContent RenderTable(IEnumerable<User> users) =>
+HtmlTemplate RenderTable(IEnumerable<User> users) =>
     Html.Template($"""
         <table>
             <thead>
@@ -96,7 +96,7 @@ IHtmlContent RenderTable(IEnumerable<User> users) =>
 ## Form with CSRF Protection
 
 ```csharp
-IHtmlContent RenderForm(string action, string csrfToken) =>
+HtmlTemplate RenderForm(string action, string csrfToken) =>
     Html.Template($"""
         <form method="post" action="{action}">
             <input type="hidden" name="__RequestVerificationToken" value="{csrfToken}" />
@@ -123,8 +123,7 @@ app.Use(async (context, next) =>
             <a href="/">Go home</a>
             """);
 
-        context.Response.ContentType = "text/html";
-        await context.Response.WriteAsync(html.ToString());
+        await html.ExecuteAsync(context);
     }
 });
 ```

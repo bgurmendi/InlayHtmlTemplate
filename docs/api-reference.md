@@ -2,16 +2,16 @@
 
 ## Html (static class)
 
-The primary API for rendering and composing HTML templates. All methods that produce HTML return `IHtmlContent`, so their results compose into outer templates without double-escaping.
+The primary API for rendering and composing HTML templates.
 
 ### `Html.Template(FormattableString formattable)`
 
-Renders an interpolated string as HTML with context-aware escaping.
+Creates a deferred HTML template with context-aware escaping. Rendering happens on demand when the result is written to a response or converted to string.
 
 **Parameters:**
 - `formattable` — A C# interpolated string (`$"..."` or `$"""..."""`). Must be passed directly as an interpolated string, not as a pre-built `string`.
 
-**Returns:** `IHtmlContent` — The rendered HTML. Composes directly into outer templates.
+**Returns:** `HtmlTemplate` — Implements `IHtmlContent` (for composition), `IActionResult` (for MVC controllers), and `IResult` (for minimal APIs). Can be returned directly from controller actions.
 
 **Important:** The method signature uses `FormattableString`, which means you must pass an interpolated string literal directly. Assigning the interpolated string to a `string` variable first will lose the template structure:
 
@@ -72,9 +72,22 @@ Index variant with empty-collection fallback.
 
 **Returns:** `IHtmlContent`
 
+## HtmlTemplate (class)
+
+The concrete type returned by `Html.Template`. Stores a `FormattableString` and defers rendering until needed. Nested templates render recursively onto the same `TextWriter` — no intermediate string allocations.
+
+**Implements:** `IHtmlContent`, `IActionResult`, `IResult`
+
+### Key methods
+
+- `WriteTo(TextWriter, HtmlEncoder)` — Renders the template to a writer. Nested `IHtmlContent` args are rendered recursively onto the same writer.
+- `ExecuteResultAsync(ActionContext)` — Writes directly to the HTTP response stream with `Content-Type: text/html; charset=utf-8`.
+- `ExecuteAsync(HttpContext)` — Same, for minimal APIs.
+- `ToString()` — Renders to a string (for cases where you need the raw HTML).
+
 ## SimpleHtmlTemplate
 
-Low-level rendering engine used internally by `Html.Template`. Returns `string` instead of `IHtmlContent`. Prefer `Html.Template` for application code.
+Low-level rendering engine. Returns `string` instead of `HtmlTemplate`. Prefer `Html.Template` for application code.
 
 ### `SimpleHtmlTemplate.Render(FormattableString formattable)`
 
@@ -108,20 +121,20 @@ This class is public and can be used independently if you need to analyze HTML c
 ## Escaping Behavior Details
 
 ### Content Context
-Standard HTML encoding via `WebUtility.HtmlEncode`. Characters like `<`, `>`, `&`, `"` are converted to their HTML entity equivalents.
+HTML encoding via `HtmlEncoder.Default`. Characters like `<`, `>`, `&`, `"`, `'` are converted to their HTML entity equivalents.
 
 ### Attribute Context
-HTML encoding plus additional escaping for quote characters:
+Same HTML encoding as content — `HtmlEncoder.Default` handles both quote characters natively:
 - `"` → `&quot;`
-- `'` → `&#39;`
+- `'` → `&#x27;`
 
 This prevents attribute breakout attacks where a value like `foo" onclick="alert(1)` could inject new attributes.
 
 ### URL Attribute Context
-URL encoding via `WebUtility.UrlEncode`, with an additional check: values starting with `javascript:` (case-insensitive) are replaced with `#` to prevent script injection through URL attributes.
+URL encoding via `UrlEncoder.Default`, with an additional check: values starting with `javascript:` (case-insensitive) are replaced with `#` to prevent script injection through URL attributes.
 
 ### IHtmlContent Bypass
-Objects implementing `Microsoft.AspNetCore.Html.IHtmlContent` are inserted without escaping. This is how template composition works — `Html.Template` returns `IHtmlContent`, so its result passes through without double-escaping when used inside another template:
+Objects implementing `Microsoft.AspNetCore.Html.IHtmlContent` are inserted without escaping by calling `WriteTo` on the same `TextWriter`. This is how template composition works — `HtmlTemplate` implements `IHtmlContent`, so nested templates render recursively without intermediate strings:
 
 ```csharp
 var inner = Html.Template($"<span>{name}</span>");

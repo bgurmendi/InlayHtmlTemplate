@@ -29,11 +29,11 @@ var name = "World";
 var html = Html.Template($"<h1>Hello, {name}!</h1>");
 ```
 
-`Html.Template` accepts a `FormattableString` (a C# interpolated string `$"..."`), escapes each value based on its HTML context, and returns `IHtmlContent`. This means C# passes the template format and arguments separately, allowing the engine to inspect the HTML structure and escape each value appropriately.
+`Html.Template` accepts a `FormattableString` (a C# interpolated string `$"..."`), escapes each value based on its HTML context, and returns `HtmlTemplate`. This means C# passes the template format and arguments separately, allowing the engine to inspect the HTML structure and escape each value appropriately. `HtmlTemplate` implements `IHtmlContent` (for composition), `IActionResult` (for MVC controllers), and `IResult` (for minimal APIs).
 
 ## Composing Templates
 
-Since `Html.Template` returns `IHtmlContent`, and `IHtmlContent` values are inserted without double-escaping, templates compose naturally:
+Since `Html.Template` returns `HtmlTemplate` (which implements `IHtmlContent`), and `IHtmlContent` values are inserted without double-escaping, templates compose naturally:
 
 ```csharp
 var header = Html.Template($"<h1>{title}</h1>");
@@ -45,6 +45,8 @@ No wrapping, no special calls — just embed one template result inside another.
 
 ## Using in ASP.NET Core Controllers
 
+`HtmlTemplate` implements `IActionResult`, so you can return it directly:
+
 ```csharp
 using AspNetTemplates;
 using Microsoft.AspNetCore.Mvc;
@@ -54,17 +56,18 @@ public class HomeController : Controller
     public IActionResult Index()
     {
         var userName = GetCurrentUser();
-        var html = Html.Template($"""
+        return Html.Template($"""
             <div class="welcome">
                 <h1>Welcome, {userName}!</h1>
             </div>
             """);
-        return Content(html.ToString(), "text/html");
     }
 }
 ```
 
 ## Using in Minimal APIs
+
+`HtmlTemplate` also implements `IResult`, so it works with minimal APIs too:
 
 ```csharp
 using AspNetTemplates;
@@ -74,8 +77,7 @@ var app = WebApplication.CreateBuilder(args).Build();
 app.MapGet("/", (HttpContext ctx) =>
 {
     var name = ctx.Request.Query["name"].ToString();
-    var html = Html.Template($"<h1>Hello, {name}!</h1>");
-    return Results.Content(html.ToString(), "text/html");
+    return Html.Template($"<h1>Hello, {name}!</h1>");
 });
 
 app.Run();
