@@ -133,6 +133,18 @@ dotnet build
 dotnet test
 ```
 
+## Prior Art
+
+The concept of context-aware auto-escaping in template systems was [introduced by Google in 2009](https://security.googleblog.com/2009/03/reducing-xss-by-way-of-automatic.html). Several languages have implementations:
+
+- **Go** — [`html/template`](https://pkg.go.dev/html/template) in the standard library. Parses the template structure and applies different escaping for HTML, CSS, JavaScript, and URI contexts automatically.
+- **Google Closure Templates** — [Soy templates](https://github.com/google/closure-templates/blob/master/documentation/concepts/auto-escaping.md) with strict contextual auto-escaping enabled by default. Used extensively within Google.
+- **Google safehtml** — [`safehtml/template`](https://pkg.go.dev/github.com/google/safehtml/template) for Go, a hardened version of `html/template` that uses the term "autosanitization" and adds safe HTML types.
+- **Python** — [Jinja2](https://jinja.palletsprojects.com/en/stable/api/#autoescaping) provides auto-escaping with `Markup` types to prevent double-escaping, though it does not distinguish between HTML contexts.
+- **Angular** — Built-in contextual sanitization via `DomSanitizer`, distinguishing HTML, styles, URLs, and resource URLs.
+
+AspNetTemplates brings this approach to .NET using native C# string interpolation (`FormattableString`) instead of a custom template language.
+
 ## License
 
 [MIT](LICENSE)
