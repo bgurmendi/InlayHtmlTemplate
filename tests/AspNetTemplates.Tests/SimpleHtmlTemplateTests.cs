@@ -26,8 +26,8 @@ public class SimpleHtmlTemplateTests
     [Fact]
     public void Render_AttributeContext_Escapes()
     {
-        var className = "foo\" onclick=\"alert(1)";
-        var result = Html.Template($"<div class=\"{className}\">test</div>").ToString();
+        var className = """foo" onclick="alert(1)""";
+        var result = Html.Template($"""<div class="{className}">test</div>""").ToString();
 
         Assert.DoesNotContain("\" onclick=\"", result);
         Assert.Contains("&quot;", result);
@@ -37,7 +37,7 @@ public class SimpleHtmlTemplateTests
     public void Render_UrlAttribute_BlocksJavascript()
     {
         var url = "javascript:alert(1)";
-        var result = Html.Template($"<a href=\"{url}\">link</a>").ToString();
+        var result = Html.Template($"""<a href="{url}">link</a>""").ToString();
 
         Assert.DoesNotContain("javascript", result);
     }

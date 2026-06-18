@@ -22,7 +22,7 @@ public class HtmlHelpersTests
     public void If_True_RendersContent()
     {
         var name = "Admin";
-        var badge = Html.If(true, $"<span class=\"badge\">{name}</span>");
+        var badge = Html.If(true, $"""<span class="badge">{name}</span>""");
         var result = Html.Template($"<div>{badge}</div>").ToString();
 
         Assert.Contains("<span", result);
@@ -43,7 +43,7 @@ public class HtmlHelpersTests
     {
         var content = Html.If(false,
             $"<span>Logged in</span>",
-            $"<a href=\"/login\">Log in</a>");
+            $"""<a href="/login">Log in</a>""");
         var result = Html.Template($"<nav>{content}</nav>").ToString();
 
         Assert.Contains("Log in", result);
@@ -89,7 +89,7 @@ public class HtmlHelpersTests
         var isActive = true;
         var isDisabled = false;
         var classes = Html.Css(("tab", true), ("active", isActive), ("disabled", isDisabled));
-        var result = Html.Template($"<div class=\"{classes}\">content</div>").ToString();
+        var result = Html.Template($"""<div class="{classes}">content</div>""").ToString();
 
         Assert.Contains("tab active", result);
         Assert.DoesNotContain("disabled", result);
@@ -136,7 +136,7 @@ public class HtmlHelpersTests
         var items = Array.Empty<string>();
         var list = Html.Each(items,
             item => $"<li>{item}</li>",
-            $"<li class=\"empty\">No items found.</li>");
+            $"""<li class="empty">No items found.</li>""");
         var result = Html.Template($"<ul>{list}</ul>").ToString();
 
         Assert.Contains("No items found.", result);
@@ -159,11 +159,11 @@ public class HtmlHelpersTests
     public void Each_WithIndex()
     {
         var items = new[] { "A", "B" };
-        var list = Html.Each(items, (item, i) => $"<li data-index=\"{i}\">{item}</li>");
+        var list = Html.Each(items, (item, i) => $"""<li data-index="{i}">{item}</li>""");
         var result = Html.Template($"<ul>{list}</ul>").ToString();
 
-        Assert.Contains("data-index=\"0\"", result);
-        Assert.Contains("data-index=\"1\"", result);
+        Assert.Contains("""data-index="0""", result);
+        Assert.Contains("""data-index="1""", result);
     }
 
     // --- Composition ---
@@ -174,7 +174,7 @@ public class HtmlHelpersTests
         var isAdmin = true;
         var users = new[] { "Alice", "Bob" };
 
-        var badge = Html.If(isAdmin, $"<span class=\"badge\">Admin</span>");
+        var badge = Html.If(isAdmin, $"""<span class="badge">Admin</span>""");
         var list = Html.Each(users, u => $"<li>{u}</li>");
 
         var result = Html.Template($"<div>{badge}<ul>{list}</ul></div>").ToString();
