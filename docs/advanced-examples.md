@@ -278,6 +278,76 @@ var html = Html.Template($"""
 ```
 
 
+## Passing children to a component
+
+A template function can receive child content as `IHtmlContent` parameters. Since `Html.Template`, `Html.If`, `Html.Each`, and any other `IHtmlContent` compose without double-escaping, you can pass one or more blocks as arguments:
+
+### Single child
+
+```csharp
+HtmlTemplate Section(string title, IHtmlContent body) =>
+    Html.Template($"""
+        <section class="panel">
+            <h2 class="panel-title">{title}</h2>
+            <div class="panel-body">
+                {body}
+            </div>
+        </section>
+        """);
+
+// Usage:
+var content = Html.Template($"""
+    <p>Welcome back, {userName}!</p>
+    <p>You have {messageCount} new messages.</p>
+    """);
+
+var html = Section("Dashboard", content);
+```
+
+### Multiple named slots
+
+Use several `IHtmlContent` parameters for different slots — like header, body, footer:
+
+```csharp
+HtmlTemplate Card(string title, IHtmlContent body, IHtmlContent? footer = null) =>
+    Html.Template($"""
+        <div class="card">
+            <div class="card-header"><h3>{title}</h3></div>
+            <div class="card-body">{body}</div>
+            {Html.If(footer != null, $"""<div class="card-footer">{footer}</div>""")}
+        </div>
+        """);
+
+// Usage:
+var stats = Html.Template($"<p>{orderCount} orders this month</p>");
+var actions = Html.Template($"""<a href="/orders">View all</a>""");
+
+var html = Card("Orders", stats, actions);
+```
+
+### Children as a list
+
+When the number of children is variable, use `params IHtmlContent[]`:
+
+```csharp
+HtmlTemplate Grid(params IHtmlContent[] cells) =>
+    Html.Template($"""
+        <div class="grid">
+            {Html.Each(cells, cell => $"""<div class="grid-cell">{cell}</div>""")}
+        </div>
+        """);
+
+// Usage:
+var html = Grid(
+    Html.Template($"<h3>{stats.Revenue}</h3>"),
+    Html.Template($"<h3>{stats.Users}</h3>"),
+    Html.Template($"<h3>{stats.Orders}</h3>")
+);
+```
+
+The key insight is that `IHtmlContent` is the universal currency for composition. Any template function can accept children of any shape — a single block, named slots, or a variable-length list — and embed them with `{child}` in the template body.
+
+
 ## Complete example: user dashboard
 
 This example combines all the helpers in a realistic scenario:
