@@ -7,22 +7,25 @@ using AspNetTemplates;
 
 public static class PageLayout
 {
-    public static string Render(string title, string bodyContent)
+    public static IHtmlContent Render(string title, IHtmlContent bodyContent)
     {
-        var body = new HtmlString(bodyContent);
-        return SimpleHtmlTemplate.Render($@"
+        return Html.Template($@"
             <!DOCTYPE html>
             <html>
             <head>
                 <title>{title}</title>
             </head>
             <body>
-                {body}
+                {bodyContent}
             </body>
             </html>
         ");
     }
 }
+
+// Usage:
+var body = Html.Template($"<h1>Welcome, {userName}!</h1>");
+var page = PageLayout.Render("Home", body);
 ```
 
 ## User Profile Card
@@ -33,7 +36,7 @@ var bio = user.Bio;          // "I love C# & .NET"
 var avatar = user.AvatarUrl; // "https://example.com/alice.jpg"
 var website = user.Website;  // "https://alice.dev"
 
-var html = SimpleHtmlTemplate.Render($@"
+var html = Html.Template($@"
     <div class=""profile-card"">
         <img src=""{avatar}"" alt=""{name}"" />
         <h2>{name}</h2>
@@ -50,19 +53,18 @@ Each value is escaped according to its position:
 - `{bio}` in `<p>`: content-escaped (`&` becomes `&amp;`)
 - `{website}` in `href`: URL-encoded
 
-## Composing Templates with IHtmlContent
+## Composing Templates
+
+Since `Html.Template` returns `IHtmlContent`, the result of one template embeds directly in another — no wrapping needed:
 
 ```csharp
-using Microsoft.AspNetCore.Html;
+IHtmlContent RenderListItem(string text) =>
+    Html.Template($"<li>{text}</li>");
 
-string RenderListItem(string text) =>
-    SimpleHtmlTemplate.Render($"<li>{text}</li>");
-
-string RenderList(IEnumerable<string> items)
+IHtmlContent RenderList(IEnumerable<string> items)
 {
-    var listItems = string.Join("\n", items.Select(RenderListItem));
-    var rawList = new HtmlString(listItems);
-    return SimpleHtmlTemplate.Render($"<ul>{rawList}</ul>");
+    var listItems = Html.Each(items, item => $"<li>{item}</li>");
+    return Html.Template($"<ul>{listItems}</ul>");
 }
 
 var html = RenderList(new[] { "First", "<script>xss</script>", "Third" });
@@ -72,8 +74,8 @@ var html = RenderList(new[] { "First", "<script>xss</script>", "Third" });
 ## Dynamic Table from Data
 
 ```csharp
-string RenderRow(string name, string email, string role) =>
-    SimpleHtmlTemplate.Render($@"
+IHtmlContent RenderRow(string name, string email, string role) =>
+    Html.Template($@"
         <tr>
             <td>{name}</td>
             <td><a href=""mailto:{email}"">{email}</a></td>
@@ -81,31 +83,27 @@ string RenderRow(string name, string email, string role) =>
         </tr>
     ");
 
-string RenderTable(IEnumerable<User> users)
-{
-    var rows = string.Join("\n", users.Select(u => RenderRow(u.Name, u.Email, u.Role)));
-    var rawRows = new HtmlString(rows);
-    return SimpleHtmlTemplate.Render($@"
+IHtmlContent RenderTable(IEnumerable<User> users) =>
+    Html.Template($@"
         <table>
             <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                </tr>
+                <tr><th>Name</th><th>Email</th><th>Role</th></tr>
             </thead>
-            <tbody>{rawRows}</tbody>
+            <tbody>{Html.Each(users, u => $@"
+                <tr>
+                    <td>{u.Name}</td>
+                    <td><a href=""mailto:{u.Email}"">{u.Email}</a></td>
+                    <td>{u.Role}</td>
+                </tr>")}</tbody>
         </table>
     ");
-}
 ```
 
 ## Form with CSRF Protection
 
 ```csharp
-string RenderForm(string action, string csrfToken)
-{
-    return SimpleHtmlTemplate.Render($@"
+IHtmlContent RenderForm(string action, string csrfToken) =>
+    Html.Template($@"
         <form method=""post"" action=""{action}"">
             <input type=""hidden"" name=""__RequestVerificationToken"" value=""{csrfToken}"" />
             <label for=""name"">Name:</label>
@@ -113,22 +111,6 @@ string RenderForm(string action, string csrfToken)
             <button type=""submit"">Submit</button>
         </form>
     ");
-}
-```
-
-## Conditional Content
-
-```csharp
-string RenderAlert(string? message, string type = "info")
-{
-    if (message == null) return "";
-
-    return SimpleHtmlTemplate.Render($@"
-        <div class=""alert alert-{type}"" role=""alert"">
-            {message}
-        </div>
-    ");
-}
 ```
 
 ## Integration with ASP.NET Core Middleware
@@ -141,14 +123,14 @@ app.Use(async (context, next) =>
     if (context.Response.StatusCode == 404)
     {
         var path = context.Request.Path.ToString();
-        var html = SimpleHtmlTemplate.Render($@"
+        var html = Html.Template($@"
             <h1>Page Not Found</h1>
             <p>The page <code>{path}</code> does not exist.</p>
             <a href=""/"">Go home</a>
         ");
 
         context.Response.ContentType = "text/html";
-        await context.Response.WriteAsync(html);
+        await context.Response.WriteAsync(html.ToString());
     }
 });
 ```

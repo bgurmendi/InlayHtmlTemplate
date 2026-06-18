@@ -1,59 +1,32 @@
 # API Reference
 
-## SimpleHtmlTemplate
+## Html (static class)
 
-### `SimpleHtmlTemplate.Render(FormattableString formattable)`
+The primary API for rendering and composing HTML templates. All methods that produce HTML return `IHtmlContent`, so their results compose into outer templates without double-escaping.
 
-Renders an HTML template with context-aware escaping.
+### `Html.Template(FormattableString formattable)`
+
+Renders an interpolated string as HTML with context-aware escaping.
 
 **Parameters:**
 - `formattable` — A C# interpolated string (`$"..."`). Must be passed directly as an interpolated string, not as a pre-built `string`.
 
-**Returns:** `string` — The rendered HTML with all interpolated values escaped according to their context.
+**Returns:** `IHtmlContent` — The rendered HTML. Composes directly into outer templates.
 
 **Important:** The method signature uses `FormattableString`, which means you must pass an interpolated string literal directly. Assigning the interpolated string to a `string` variable first will lose the template structure:
 
 ```csharp
 // Correct - FormattableString is preserved
-var html = SimpleHtmlTemplate.Render($"<p>{userInput}</p>");
+var html = Html.Template($"<p>{userInput}</p>");
 
 // Wrong - this becomes a regular string, no escaping happens
 string template = $"<p>{userInput}</p>";
-// var html = SimpleHtmlTemplate.Render(template); // Won't compile
+// Html.Template(template); // Won't compile
 ```
-
-## HtmlContext (enum)
-
-Represents the HTML context where an interpolated value appears.
-
-| Value          | Description                                      | Escaping Strategy               |
-|----------------|--------------------------------------------------|---------------------------------|
-| `Content`      | Inside element content (`<p>{value}</p>`)        | `HtmlEncode`                    |
-| `Attribute`    | Inside an attribute (`class="{value}"`)          | `HtmlEncode` + quote escaping   |
-| `UrlAttribute` | Inside `href` or `src` (`href="{value}"`)        | `UrlEncode` + `javascript:` block |
-| `Script`       | Inside a `<script>` tag (reserved for future use)| `HtmlEncode` (default)          |
-
-## HtmlContextAnalyzer
-
-A character-by-character HTML parser that tracks the current context.
-
-### Properties
-
-- `CurrentContext` (`HtmlContext`) — The current HTML context based on characters processed so far.
-
-### Methods
-
-- `ProcessChar(char c)` — Feeds a character to the analyzer, updating the internal state.
-
-This class is public and can be used independently if you need to analyze HTML context for other purposes.
-
-## Html (static class)
-
-Helper methods for common template patterns. All methods that produce HTML return `IHtmlContent`, so their results compose into outer templates without double-escaping.
 
 ### `Html.Raw(string html)`
 
-Wraps a pre-rendered HTML string as trusted `IHtmlContent`.
+Wraps a pre-rendered HTML string as trusted `IHtmlContent`. Use for HTML coming from external sources (markdown renderers, sanitizers, etc.).
 
 **Returns:** `IHtmlContent`
 
@@ -99,6 +72,39 @@ Index variant with empty-collection fallback.
 
 **Returns:** `IHtmlContent`
 
+## SimpleHtmlTemplate
+
+Low-level rendering engine used internally by `Html.Template`. Returns `string` instead of `IHtmlContent`. Prefer `Html.Template` for application code.
+
+### `SimpleHtmlTemplate.Render(FormattableString formattable)`
+
+**Returns:** `string` — The rendered HTML as a plain string.
+
+## HtmlContext (enum)
+
+Represents the HTML context where an interpolated value appears.
+
+| Value          | Description                                      | Escaping Strategy               |
+|----------------|--------------------------------------------------|---------------------------------|
+| `Content`      | Inside element content (`<p>{value}</p>`)        | `HtmlEncode`                    |
+| `Attribute`    | Inside an attribute (`class="{value}"`)          | `HtmlEncode` + quote escaping   |
+| `UrlAttribute` | Inside `href` or `src` (`href="{value}"`)        | `UrlEncode` + `javascript:` block |
+| `Script`       | Inside a `<script>` tag (reserved for future use)| `HtmlEncode` (default)          |
+
+## HtmlContextAnalyzer
+
+A character-by-character HTML parser that tracks the current context.
+
+### Properties
+
+- `CurrentContext` (`HtmlContext`) — The current HTML context based on characters processed so far.
+
+### Methods
+
+- `ProcessChar(char c)` — Feeds a character to the analyzer, updating the internal state.
+
+This class is public and can be used independently if you need to analyze HTML context for other purposes.
+
 ## Escaping Behavior Details
 
 ### Content Context
@@ -115,10 +121,10 @@ This prevents attribute breakout attacks where a value like `foo" onclick="alert
 URL encoding via `WebUtility.UrlEncode`, with an additional check: values starting with `javascript:` (case-insensitive) are replaced with `#` to prevent script injection through URL attributes.
 
 ### IHtmlContent Bypass
-Objects implementing `Microsoft.AspNetCore.Html.IHtmlContent` are inserted without escaping. Use `HtmlString` to pass pre-sanitized HTML:
+Objects implementing `Microsoft.AspNetCore.Html.IHtmlContent` are inserted without escaping. This is how template composition works — `Html.Template` returns `IHtmlContent`, so its result passes through without double-escaping when used inside another template:
 
 ```csharp
-var trusted = new HtmlString("<strong>safe</strong>");
-SimpleHtmlTemplate.Render($"<div>{trusted}</div>");
-// Output: <div><strong>safe</strong></div>
+var inner = Html.Template($"<span>{name}</span>");
+var outer = Html.Template($"<div>{inner}</div>");
+// inner is IHtmlContent → inserted as-is, no double-escaping
 ```

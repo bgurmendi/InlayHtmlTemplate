@@ -18,8 +18,15 @@ dotnet add package AspNetTemplates
 using AspNetTemplates;
 
 var userName = "<script>alert('xss')</script>";
-var html = SimpleHtmlTemplate.Render($"<h1>Hello, {userName}!</h1>");
+var html = Html.Template($"<h1>Hello, {userName}!</h1>");
 // Output: <h1>Hello, &lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;!</h1>
+```
+
+`Html.Template` returns `IHtmlContent`, so templates compose naturally — the result of one template can be embedded directly in another without double-escaping:
+
+```csharp
+var header = Html.Template($"<h1>{title}</h1>");
+var page = Html.Template($"<div>{header}<p>{body}</p></div>");
 ```
 
 ## Context-Aware Escaping
@@ -29,34 +36,22 @@ The engine detects three HTML contexts and escapes accordingly:
 ### Element Content
 ```csharp
 var text = "<b>bold</b>";
-SimpleHtmlTemplate.Render($"<p>{text}</p>");
+Html.Template($"<p>{text}</p>");
 // Output: <p>&lt;b&gt;bold&lt;/b&gt;</p>
 ```
 
 ### Attribute Values
 ```csharp
 var className = "foo\" onclick=\"alert(1)";
-SimpleHtmlTemplate.Render($"<div class=\"{className}\">test</div>");
+Html.Template($"<div class=\"{className}\">test</div>");
 // Attribute is safely escaped, onclick injection is neutralized
 ```
 
 ### URL Attributes (href, src)
 ```csharp
 var url = "javascript:alert(1)";
-SimpleHtmlTemplate.Render($"<a href=\"{url}\">click</a>");
+Html.Template($"<a href=\"{url}\">click</a>");
 // javascript: URLs are blocked and replaced with #
-```
-
-## Passing Raw HTML
-
-Values implementing `IHtmlContent` are inserted without escaping:
-
-```csharp
-using Microsoft.AspNetCore.Html;
-
-var rawHtml = new HtmlString("<strong>trusted</strong>");
-SimpleHtmlTemplate.Render($"<div>{rawHtml}</div>");
-// Output: <div><strong>trusted</strong></div>
 ```
 
 ## Template Helpers
@@ -81,6 +76,15 @@ Html.Each(items,
 ```
 
 All helpers return `IHtmlContent` and compose naturally into outer templates. See [Advanced Examples](docs/advanced-examples.md) for composition patterns and complete examples.
+
+## Passing Raw HTML
+
+`Html.Raw` wraps a string as trusted `IHtmlContent` for content from external sources (markdown renderers, sanitizers, etc.):
+
+```csharp
+var sanitizedHtml = mySanitizer.Sanitize(userHtml);
+Html.Template($"<div>{Html.Raw(sanitizedHtml)}</div>");
+```
 
 ## Building
 
