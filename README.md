@@ -119,6 +119,13 @@ var sanitizedHtml = mySanitizer.Sanitize(userHtml);
 Html.Template($"<div>{Html.Raw(sanitizedHtml)}</div>");
 ```
 
+## Documentation
+
+- [Getting Started](docs/getting-started.md) — Installation, basic usage, controllers, minimal APIs
+- [Examples](docs/examples.md) — Layouts, profile cards, tables, forms, middleware
+- [Advanced Examples](docs/advanced-examples.md) — Composition, conditionals, class toggling, list iteration, complete dashboard
+- [API Reference](docs/api-reference.md) — All methods, escaping behavior, caching internals
+
 ## Building
 
 ```bash
