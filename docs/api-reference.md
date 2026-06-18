@@ -47,6 +47,58 @@ A character-by-character HTML parser that tracks the current context.
 
 This class is public and can be used independently if you need to analyze HTML context for other purposes.
 
+## Html (static class)
+
+Helper methods for common template patterns. All methods that produce HTML return `IHtmlContent`, so their results compose into outer templates without double-escaping.
+
+### `Html.Raw(string html)`
+
+Wraps a pre-rendered HTML string as trusted `IHtmlContent`.
+
+**Returns:** `IHtmlContent`
+
+### `Html.If(bool condition, FormattableString content)`
+
+Renders the template only when `condition` is `true`. Returns `HtmlString.Empty` otherwise.
+
+**Returns:** `IHtmlContent`
+
+### `Html.If(bool condition, FormattableString content, FormattableString fallback)`
+
+Renders `content` when `true`, `fallback` when `false`.
+
+**Returns:** `IHtmlContent`
+
+### `Html.Css(params (string className, bool active)[] classes)`
+
+Builds a space-separated CSS class string including only entries where `active` is `true`.
+
+**Returns:** `string` — A plain string (not `IHtmlContent`), so the value goes through normal attribute escaping when used inside a template.
+
+### `Html.Each<T>(IEnumerable<T> items, Func<T, FormattableString> template)`
+
+Renders the template for each item in the collection and concatenates the results.
+
+**Returns:** `IHtmlContent`
+
+### `Html.Each<T>(IEnumerable<T> items, Func<T, FormattableString> template, FormattableString empty)`
+
+Same as above, but renders the `empty` template when the collection has no elements. The collection is materialized once to check emptiness.
+
+**Returns:** `IHtmlContent`
+
+### `Html.Each<T>(IEnumerable<T> items, Func<T, int, FormattableString> template)`
+
+Like `Each`, but the lambda also receives the zero-based index of each item.
+
+**Returns:** `IHtmlContent`
+
+### `Html.Each<T>(IEnumerable<T> items, Func<T, int, FormattableString> template, FormattableString empty)`
+
+Index variant with empty-collection fallback.
+
+**Returns:** `IHtmlContent`
+
 ## Escaping Behavior Details
 
 ### Content Context

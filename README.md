@@ -59,6 +59,29 @@ SimpleHtmlTemplate.Render($"<div>{rawHtml}</div>");
 // Output: <div><strong>trusted</strong></div>
 ```
 
+## Template Helpers
+
+The `Html` class provides helpers for common template patterns:
+
+```csharp
+// Conditional rendering
+Html.If(isAdmin, $"<span class=\"badge\">Admin</span>")
+Html.If(isLoggedIn, $"<span>{name}</span>", $"<a href=\"/login\">Log in</a>")
+
+// CSS class toggling
+Html.Css(("btn", true), ("active", isActive), ("disabled", isDisabled))
+
+// List iteration
+Html.Each(items, item => $"<li>{item}</li>")
+
+// List with fallback for empty collections
+Html.Each(items,
+    item => $"<li>{item}</li>",
+    $"<li class=\"empty\">No items found.</li>")
+```
+
+All helpers return `IHtmlContent` and compose naturally into outer templates. See [Advanced Examples](docs/advanced-examples.md) for composition patterns and complete examples.
+
 ## Building
 
 ```bash
