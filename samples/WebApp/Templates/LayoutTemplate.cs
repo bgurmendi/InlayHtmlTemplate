@@ -5,7 +5,7 @@ namespace WebApp.Templates;
 
 public static class LayoutTemplate
 {
-    public static IHtmlContent Render(string title, IHtmlContent body, string? activeNav = null)
+    public static HtmlTemplate Render(string title, IHtmlContent body, string? activeNav = null)
     {
         return Html.Template($"""
             <!DOCTYPE html>

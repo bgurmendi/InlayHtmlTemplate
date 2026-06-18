@@ -29,15 +29,13 @@ public class HomeController : Controller
         };
 
         var body = HomeTemplates.Index(features);
-        var html = LayoutTemplate.Render("Home", body, "Home");
-        return Content(html.ToString()!, "text/html");
+        return LayoutTemplate.Render("Home", body, "Home");
     }
 
     public IActionResult Privacy()
     {
         var body = HomeTemplates.Privacy();
-        var html = LayoutTemplate.Render("Privacy", body, "Privacy");
-        return Content(html.ToString()!, "text/html");
+        return LayoutTemplate.Render("Privacy", body, "Privacy");
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -45,7 +43,6 @@ public class HomeController : Controller
     {
         var requestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
         var body = ErrorTemplate.Render(requestId);
-        var html = LayoutTemplate.Render("Error", body);
-        return Content(html.ToString()!, "text/html");
+        return LayoutTemplate.Render("Error", body);
     }
 }
