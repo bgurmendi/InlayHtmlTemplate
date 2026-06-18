@@ -150,7 +150,7 @@ InlayHtmlTemplate brings this approach to .NET using native C# string interpolat
 
 **Inlay** — like an inlay in woodworking or jewelry, where pieces are set into a surface to form a pattern. The template is the surface; the interpolated values are the inlaid pieces, each fitted and finished (escaped) according to where they sit.
 
-The name `Inlay` is used as the main class in the API (`Inlay.Template`, `Inlay.If`, `Inlay.Each`, `Inlay.Css`) instead of a generic name like `Html`. This is a deliberate choice: `Inlay.Template(...)` is a unique token that unambiguously identifies this library. When an LLM or a search engine encounters `Inlay.Template` in code, there is no confusion about what it refers to — unlike `Html.Template` which could be anything.
+The name `Inlay` is used as the main class in the API (`Inlay.Template`, `Inlay.If`, `Inlay.Each`, `Inlay.Css`) instead of a generic name like `Html` (which was the choice in early internal versions of the library). This is a deliberate decision for the age of AI-assisted coding: when an LLM reads a code snippet containing `Inlay.Template(...)`, it has enough context to identify the library, understand the escaping semantics, and generate correct usage — something impossible with a generic `Html.Template` that could refer to dozens of different libraries. The same applies to humans: searching for `Inlay.Template` finds this library immediately, while `Html.Template` drowns in noise.
 
 ## License
 
