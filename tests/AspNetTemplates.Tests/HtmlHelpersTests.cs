@@ -11,7 +11,7 @@ public class HtmlHelpersTests
     public void Raw_BypassesEscaping()
     {
         var trusted = Html.Raw("<strong>bold</strong>");
-        var result = SimpleHtmlTemplate.Render($"<div>{trusted}</div>");
+        var result = Html.Template($"<div>{trusted}</div>").ToString();
 
         Assert.Equal("<div><strong>bold</strong></div>", result);
     }
@@ -23,7 +23,7 @@ public class HtmlHelpersTests
     {
         var name = "Admin";
         var badge = Html.If(true, $"<span class=\"badge\">{name}</span>");
-        var result = SimpleHtmlTemplate.Render($"<div>{badge}</div>");
+        var result = Html.Template($"<div>{badge}</div>").ToString();
 
         Assert.Contains("<span", result);
         Assert.Contains("Admin", result);
@@ -33,7 +33,7 @@ public class HtmlHelpersTests
     public void If_False_RendersEmpty()
     {
         var badge = Html.If(false, $"<span>Admin</span>");
-        var result = SimpleHtmlTemplate.Render($"<div>{badge}</div>");
+        var result = Html.Template($"<div>{badge}</div>").ToString();
 
         Assert.Equal("<div></div>", result);
     }
@@ -44,7 +44,7 @@ public class HtmlHelpersTests
         var content = Html.If(false,
             $"<span>Logged in</span>",
             $"<a href=\"/login\">Log in</a>");
-        var result = SimpleHtmlTemplate.Render($"<nav>{content}</nav>");
+        var result = Html.Template($"<nav>{content}</nav>").ToString();
 
         Assert.Contains("Log in", result);
         Assert.DoesNotContain("Logged in", result);
@@ -55,7 +55,7 @@ public class HtmlHelpersTests
     {
         var userInput = "<script>xss</script>";
         var content = Html.If(true, $"<p>{userInput}</p>");
-        var result = SimpleHtmlTemplate.Render($"<div>{content}</div>");
+        var result = Html.Template($"<div>{content}</div>").ToString();
 
         Assert.DoesNotContain("<script>", result);
     }
@@ -89,7 +89,7 @@ public class HtmlHelpersTests
         var isActive = true;
         var isDisabled = false;
         var classes = Html.Css(("tab", true), ("active", isActive), ("disabled", isDisabled));
-        var result = SimpleHtmlTemplate.Render($"<div class=\"{classes}\">content</div>");
+        var result = Html.Template($"<div class=\"{classes}\">content</div>").ToString();
 
         Assert.Contains("tab active", result);
         Assert.DoesNotContain("disabled", result);
@@ -102,7 +102,7 @@ public class HtmlHelpersTests
     {
         var items = new[] { "One", "Two", "Three" };
         var list = Html.Each(items, item => $"<li>{item}</li>");
-        var result = SimpleHtmlTemplate.Render($"<ul>{list}</ul>");
+        var result = Html.Template($"<ul>{list}</ul>").ToString();
 
         Assert.Contains("<li>One</li>", result);
         Assert.Contains("<li>Two</li>", result);
@@ -114,7 +114,7 @@ public class HtmlHelpersTests
     {
         var items = new[] { "Safe", "<script>xss</script>" };
         var list = Html.Each(items, item => $"<li>{item}</li>");
-        var result = SimpleHtmlTemplate.Render($"<ul>{list}</ul>");
+        var result = Html.Template($"<ul>{list}</ul>").ToString();
 
         Assert.Contains("<li>Safe</li>", result);
         Assert.DoesNotContain("<script>", result);
@@ -125,7 +125,7 @@ public class HtmlHelpersTests
     {
         var items = Array.Empty<string>();
         var list = Html.Each(items, item => $"<li>{item}</li>");
-        var result = SimpleHtmlTemplate.Render($"<ul>{list}</ul>");
+        var result = Html.Template($"<ul>{list}</ul>").ToString();
 
         Assert.Equal("<ul></ul>", result);
     }
@@ -137,7 +137,7 @@ public class HtmlHelpersTests
         var list = Html.Each(items,
             item => $"<li>{item}</li>",
             $"<li class=\"empty\">No items found.</li>");
-        var result = SimpleHtmlTemplate.Render($"<ul>{list}</ul>");
+        var result = Html.Template($"<ul>{list}</ul>").ToString();
 
         Assert.Contains("No items found.", result);
     }
@@ -149,7 +149,7 @@ public class HtmlHelpersTests
         var list = Html.Each(items,
             item => $"<li>{item}</li>",
             $"<li>No items</li>");
-        var result = SimpleHtmlTemplate.Render($"<ul>{list}</ul>");
+        var result = Html.Template($"<ul>{list}</ul>").ToString();
 
         Assert.Contains("<li>One</li>", result);
         Assert.DoesNotContain("No items", result);
@@ -160,7 +160,7 @@ public class HtmlHelpersTests
     {
         var items = new[] { "A", "B" };
         var list = Html.Each(items, (item, i) => $"<li data-index=\"{i}\">{item}</li>");
-        var result = SimpleHtmlTemplate.Render($"<ul>{list}</ul>");
+        var result = Html.Template($"<ul>{list}</ul>").ToString();
 
         Assert.Contains("data-index=\"0\"", result);
         Assert.Contains("data-index=\"1\"", result);
@@ -177,10 +177,20 @@ public class HtmlHelpersTests
         var badge = Html.If(isAdmin, $"<span class=\"badge\">Admin</span>");
         var list = Html.Each(users, u => $"<li>{u}</li>");
 
-        var result = SimpleHtmlTemplate.Render($"<div>{badge}<ul>{list}</ul></div>");
+        var result = Html.Template($"<div>{badge}<ul>{list}</ul></div>").ToString();
 
         Assert.Contains("<span", result);
         Assert.Contains("Alice", result);
         Assert.Contains("Bob", result);
+    }
+
+    [Fact]
+    public void Composition_TemplateInsideTemplate()
+    {
+        var name = "Alice";
+        var header = Html.Template($"<h1>{name}</h1>");
+        var page = Html.Template($"<div>{header}</div>").ToString();
+
+        Assert.Equal("<div><h1>Alice</h1></div>", page);
     }
 }

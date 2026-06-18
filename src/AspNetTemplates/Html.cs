@@ -9,6 +9,13 @@ namespace AspNetTemplates;
 public static class Html
 {
     /// <summary>
+    /// Renders an interpolated string as HTML with context-aware escaping.
+    /// Returns IHtmlContent so the result composes naturally into outer templates.
+    /// </summary>
+    public static IHtmlContent Template(FormattableString formattable)
+        => new HtmlString(SimpleHtmlTemplate.Render(formattable));
+
+    /// <summary>
     /// Wraps a pre-rendered HTML string as trusted content that won't be double-escaped.
     /// </summary>
     public static IHtmlContent Raw(string html) => new HtmlString(html);
@@ -19,7 +26,7 @@ public static class Html
     public static IHtmlContent If(bool condition, FormattableString content)
     {
         if (!condition) return HtmlString.Empty;
-        return new HtmlString(SimpleHtmlTemplate.Render(content));
+        return Template(content);
     }
 
     /// <summary>
@@ -27,7 +34,7 @@ public static class Html
     /// </summary>
     public static IHtmlContent If(bool condition, FormattableString content, FormattableString fallback)
     {
-        return new HtmlString(SimpleHtmlTemplate.Render(condition ? content : fallback));
+        return Template(condition ? content : fallback);
     }
 
     /// <summary>
@@ -57,7 +64,7 @@ public static class Html
     {
         var list = items as IReadOnlyList<T> ?? items.ToList();
         if (list.Count == 0)
-            return new HtmlString(SimpleHtmlTemplate.Render(empty));
+            return Template(empty);
         return Each(list, template);
     }
 
@@ -84,7 +91,7 @@ public static class Html
     {
         var list = items as IReadOnlyList<T> ?? items.ToList();
         if (list.Count == 0)
-            return new HtmlString(SimpleHtmlTemplate.Render(empty));
+            return Template(empty);
         return Each(list, template);
     }
 }
