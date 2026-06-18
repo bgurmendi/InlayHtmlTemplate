@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Encodings.Web;
 
@@ -6,9 +7,13 @@ namespace AspNetTemplates;
 /// <summary>
 /// Pre-analyzed template structure. Stores literal segments and the HTML context
 /// for each argument slot, so rendering only needs to encode and write values.
+/// Cached by format string reference — format strings from interpolated literals
+/// are compiler constants with stable references, so lookup is O(1).
 /// </summary>
 internal sealed class TemplatePlan
 {
+    private static readonly ConcurrentDictionary<string, TemplatePlan> Cache = new(ReferenceEqualityComparer.Instance);
+
     private readonly string[] _literals;
     private readonly HtmlContext[] _argContexts;
 
@@ -18,7 +23,10 @@ internal sealed class TemplatePlan
         _argContexts = argContexts;
     }
 
-    internal static TemplatePlan Analyze(string format)
+    internal static TemplatePlan GetOrAnalyze(string format)
+        => Cache.GetOrAdd(format, static f => Analyze(f));
+
+    private static TemplatePlan Analyze(string format)
     {
         var literals = new List<string>();
         var contexts = new List<HtmlContext>();

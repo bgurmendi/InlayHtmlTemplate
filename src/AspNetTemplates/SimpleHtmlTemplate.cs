@@ -20,7 +20,7 @@ public class SimpleHtmlTemplate
 
     internal static void RenderTo(FormattableString formattable, TextWriter writer, HtmlEncoder encoder)
     {
-        var plan = TemplatePlan.Analyze(formattable.Format);
+        var plan = TemplatePlan.GetOrAnalyze(formattable.Format);
         plan.RenderTo(formattable.GetArguments(), writer, encoder);
     }
 
