@@ -80,12 +80,15 @@ IHtmlContent RenderTable(IEnumerable<User> users) =>
             <thead>
                 <tr><th>Name</th><th>Email</th><th>Role</th></tr>
             </thead>
-            <tbody>{Html.Each(users, u => $"""
-                <tr>
-                    <td>{u.Name}</td>
-                    <td><a href="mailto:{u.Email}">{u.Email}</a></td>
-                    <td>{u.Role}</td>
-                </tr>""")}</tbody>
+            <tbody>
+                {Html.Each(users, u => $"""
+                    <tr>
+                        <td>{u.Name}</td>
+                        <td><a href="mailto:{u.Email}">{u.Email}</a></td>
+                        <td>{u.Role}</td>
+                    </tr>
+                """)}
+            </tbody>
         </table>
         """);
 ```

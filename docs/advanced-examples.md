@@ -204,7 +204,8 @@ var html = Html.Template($"""
                 <tr>
                     <td><a href="{p.Url}">{p.Name}</a></td>
                     <td>${p.Price}</td>
-                </tr>""")}
+                </tr>
+            """)}
         </tbody>
     </table>
     """);
@@ -235,7 +236,7 @@ var html = Html.Template($"""
         <h3>Notifications</h3>
         <ul>
             {Html.Each(notifications,
-                n    => $"<li>{n}</li>",
+                n => $"<li>{n}</li>",
                 $"""<li class="empty">You're all caught up!</li>""")}
         </ul>
     </div>
