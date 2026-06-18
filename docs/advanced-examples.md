@@ -1,5 +1,7 @@
 # Advanced Examples
 
+Template composition, conditionals, class toggling, and list iteration. For basic usage patterns (layouts, forms, tables), see [Examples](examples.md).
+
 ## How template composition works
 
 `Html.Template` accepts a `FormattableString` (a C# interpolated string `$"..."`), escapes each interpolated value according to its HTML context, and returns `HtmlTemplate`.

@@ -1,5 +1,7 @@
 # Examples
 
+Common patterns for using `Html.Template`. For composition, conditionals, class toggling, and list iteration, see [Advanced Examples](advanced-examples.md).
+
 ## Building a Page Layout
 
 ```csharp
