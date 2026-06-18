@@ -6,6 +6,13 @@ Context-aware HTML template engine for ASP.NET Core that uses C# string interpol
 
 Traditional HTML escaping applies the same encoding everywhere. But HTML has different contexts (element content, attributes, URLs) that require different escaping strategies. `AspNetTemplates` analyzes the template structure and applies the correct encoding automatically, preventing XSS without manual effort.
 
+## Performance
+
+- **Cached analysis** — Each `$"..."` format string is parsed once and cached. Subsequent renders skip parsing entirely and only encode the runtime values.
+- **Deferred rendering** — `Html.Template` stores the template without rendering it. The HTML is written directly to the response stream on demand — no intermediate string allocations.
+- **Zero-copy composition** — Nested templates render recursively onto the same `TextWriter`. A layout wrapping a page wrapping components produces zero intermediate strings.
+- **Lock-free cache** — The template cache uses `ConcurrentDictionary` with reference equality. Format strings from interpolated literals are compiler constants, so lookup is an O(1) identity comparison with no contention on reads.
+
 ## Installation
 
 ```bash

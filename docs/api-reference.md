@@ -85,6 +85,12 @@ The concrete type returned by `Html.Template`. Stores a `FormattableString` and 
 - `ExecuteAsync(HttpContext)` — Same, for minimal APIs.
 - `ToString()` — Renders to a string (for cases where you need the raw HTML).
 
+### Caching
+
+The first time a given `$"..."` literal is rendered, its format string is analyzed to determine the literal segments and the HTML context of each argument slot. The result is cached by format string reference in a lock-free `ConcurrentDictionary`. Since format strings from interpolated literals are compiler constants with stable references, the cache lookup is an O(1) identity comparison — no string hashing or content comparison.
+
+After warmup, every render reuses the cached analysis and only performs encoding and writing of the runtime argument values.
+
 ## SimpleHtmlTemplate
 
 Low-level rendering engine. Returns `string` instead of `HtmlTemplate`. Prefer `Html.Template` for application code.
