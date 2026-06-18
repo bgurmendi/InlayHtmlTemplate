@@ -1,25 +1,24 @@
 using System.Collections.Concurrent;
-using System.Text;
 using System.Text.Encodings.Web;
 
 namespace AspNetTemplates;
 
 /// <summary>
-/// Pre-analyzed template structure. Stores literal segments and the HTML context
-/// for each argument slot, so rendering only needs to encode and write values.
-/// Cached by format string reference — format strings from interpolated literals
-/// are compiler constants with stable references, so lookup is O(1).
+/// Pre-analyzed template structure. Stores literal spans into the original format string
+/// and the HTML context for each argument slot. Cached by format string reference.
 /// </summary>
 internal sealed class TemplatePlan
 {
     private static readonly ConcurrentDictionary<string, TemplatePlan> Cache = new(ReferenceEqualityComparer.Instance);
 
-    private readonly string[] _literals;
+    private readonly string _format;
+    private readonly int[] _literalRanges;
     private readonly HtmlContext[] _argContexts;
 
-    private TemplatePlan(string[] literals, HtmlContext[] argContexts)
+    private TemplatePlan(string format, int[] literalRanges, HtmlContext[] argContexts)
     {
-        _literals = literals;
+        _format = format;
+        _literalRanges = literalRanges;
         _argContexts = argContexts;
     }
 
@@ -28,10 +27,10 @@ internal sealed class TemplatePlan
 
     private static TemplatePlan Analyze(string format)
     {
-        var literals = new List<string>();
+        var literalRanges = new List<int>();
         var contexts = new List<HtmlContext>();
         var contextAnalyzer = new HtmlContextAnalyzer();
-        var currentLiteral = new StringBuilder();
+        int literalStart = 0;
 
         for (int i = 0; i < format.Length; i++)
         {
@@ -42,8 +41,8 @@ internal sealed class TemplatePlan
                 int end = format.IndexOf('}', i);
                 if (end == -1) break;
 
-                literals.Add(currentLiteral.ToString());
-                currentLiteral.Clear();
+                literalRanges.Add(literalStart);
+                literalRanges.Add(i - literalStart);
 
                 contexts.Add(contextAnalyzer.CurrentContext);
 
@@ -51,27 +50,33 @@ internal sealed class TemplatePlan
                     contextAnalyzer.ProcessChar(format[j]);
 
                 i = end;
-            }
-            else
-            {
-                currentLiteral.Append(format[i]);
+                literalStart = end + 1;
             }
         }
 
-        literals.Add(currentLiteral.ToString());
+        literalRanges.Add(literalStart);
+        literalRanges.Add(format.Length - literalStart);
 
-        return new TemplatePlan(literals.ToArray(), contexts.ToArray());
+        return new TemplatePlan(format, literalRanges.ToArray(), contexts.ToArray());
     }
 
     internal void RenderTo(object?[] args, TextWriter writer, HtmlEncoder encoder)
     {
-        writer.Write(_literals[0]);
+        WriteLiteral(writer, 0);
 
         for (int i = 0; i < _argContexts.Length; i++)
         {
             if (i < args.Length)
                 SimpleHtmlTemplate.WriteWithContext(args[i], writer, encoder, _argContexts[i]);
-            writer.Write(_literals[i + 1]);
+            WriteLiteral(writer, i + 1);
         }
+    }
+
+    private void WriteLiteral(TextWriter writer, int index)
+    {
+        int offset = _literalRanges[index * 2];
+        int length = _literalRanges[index * 2 + 1];
+        if (length > 0)
+            writer.Write(_format.AsSpan(offset, length));
     }
 }
