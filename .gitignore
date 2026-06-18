@@ -44,3 +44,6 @@ Thumbs.db
 ## Test results
 TestResults/
 coverage/
+
+## Stryker mutation reports
+**/StrykerOutput/

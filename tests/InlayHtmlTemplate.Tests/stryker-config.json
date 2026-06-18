@@ -1,0 +1,11 @@
+{
+  "stryker-config": {
+    "project": "InlayHtmlTemplate.csproj",
+    "reporters": ["html", "progress", "cleartext"],
+    "thresholds": {
+      "high": 80,
+      "low": 60,
+      "break": 50
+    }
+  }
+}
