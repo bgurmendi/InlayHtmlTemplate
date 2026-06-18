@@ -278,74 +278,109 @@ var html = Html.Template($"""
 ```
 
 
-## Passing children to a component
+## Passing content blocks to a template
 
-A template function can receive child content as `IHtmlContent` parameters. Since `Html.Template`, `Html.If`, `Html.Each`, and any other `IHtmlContent` compose without double-escaping, you can pass one or more blocks as arguments:
+A template function can receive an `IHtmlContent` parameter and embed it with `{body}`. The caller builds that body with its own `Html.Template` call — which can be as complex as needed. This is how layout/content composition works in practice.
 
-### Single child
+### Layout with a full page body
+
+A layout function wraps its content with the HTML shell:
 
 ```csharp
-HtmlTemplate Section(string title, IHtmlContent body) =>
+HtmlTemplate Layout(string title, IHtmlContent body) =>
     Html.Template($"""
-        <section class="panel">
-            <h2 class="panel-title">{title}</h2>
-            <div class="panel-body">
-                {body}
-            </div>
-        </section>
+        <!DOCTYPE html>
+        <html>
+        <head><title>{title}</title></head>
+        <body>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/products">Products</a>
+            </nav>
+            <main>{body}</main>
+            <footer><p>&copy; 2026 My Store</p></footer>
+        </body>
+        </html>
         """);
-
-// Usage:
-var content = Html.Template($"""
-    <p>Welcome back, {userName}!</p>
-    <p>You have {messageCount} new messages.</p>
-    """);
-
-var html = Section("Dashboard", content);
 ```
 
-### Multiple named slots
-
-Use several `IHtmlContent` parameters for different slots — like header, body, footer:
+The page function builds a complex body and passes it to the layout. The body itself uses helpers, loops, conditionals — everything composes because it all returns `IHtmlContent`:
 
 ```csharp
-HtmlTemplate Card(string title, IHtmlContent body, IHtmlContent? footer = null) =>
+record Product(string Name, decimal Price, string ImageUrl, bool InStock);
+
+HtmlTemplate ProductPage(IEnumerable<Product> products, string? search)
+{
+    var body = Html.Template($"""
+        <h1>Products</h1>
+
+        {Html.If(search != null, $"""
+            <p class="search-info">Showing results for: <strong>{search}</strong></p>
+            """)}
+
+        <div class="product-grid">
+            {Html.Each(products, p => $"""
+                <div class="{Html.Css(("product", true), ("out-of-stock", !p.InStock))}">
+                    <img src="{p.ImageUrl}" alt="{p.Name}" />
+                    <h3>{p.Name}</h3>
+                    <span class="price">${p.Price}</span>
+                    {Html.If(p.InStock,
+                        $"""<button>Add to cart</button>""",
+                        $"""<span class="sold-out">Sold out</span>""")}
+                </div>
+                """,
+                $"""<p class="empty">No products found.</p>""")}
+        </div>
+        """);
+
+    return Layout("Products", body);
+}
+```
+
+The controller returns it directly — `HtmlTemplate` is an `IActionResult`:
+
+```csharp
+public IActionResult Index(string? search)
+{
+    var products = _catalog.Search(search);
+    return ProductPage(products, search);
+}
+```
+
+### Multiple slots
+
+When a wrapper needs more than one block, use several `IHtmlContent` parameters:
+
+```csharp
+HtmlTemplate Card(string title, IHtmlContent body, IHtmlContent? actions = null) =>
     Html.Template($"""
         <div class="card">
             <div class="card-header"><h3>{title}</h3></div>
             <div class="card-body">{body}</div>
-            {Html.If(footer != null, $"""<div class="card-footer">{footer}</div>""")}
+            {Html.If(actions != null, $"""
+                <div class="card-footer">{actions}</div>
+                """)}
         </div>
         """);
-
-// Usage:
-var stats = Html.Template($"<p>{orderCount} orders this month</p>");
-var actions = Html.Template($"""<a href="/orders">View all</a>""");
-
-var html = Card("Orders", stats, actions);
 ```
 
-### Children as a list
-
-When the number of children is variable, use `params IHtmlContent[]`:
+Each slot is built independently and passed in:
 
 ```csharp
-HtmlTemplate Grid(params IHtmlContent[] cells) =>
-    Html.Template($"""
-        <div class="grid">
-            {Html.Each(cells, cell => $"""<div class="grid-cell">{cell}</div>""")}
-        </div>
-        """);
+var stats = Html.Template($"""
+    <dl>
+        <dt>Orders</dt><dd>{orderCount}</dd>
+        <dt>Revenue</dt><dd>${revenue:F2}</dd>
+    </dl>
+    """);
 
-// Usage:
-var html = Grid(
-    Html.Template($"<h3>{stats.Revenue}</h3>"),
-    Html.Template($"<h3>{stats.Users}</h3>"),
-    Html.Template($"<h3>{stats.Orders}</h3>")
-);
+var buttons = Html.Template($"""
+    <a href="/orders">View all</a>
+    <a href="/orders/export">Export CSV</a>
+    """);
+
+var html = Card("This Month", stats, buttons);
 ```
-
-The key insight is that `IHtmlContent` is the universal currency for composition. Any template function can accept children of any shape — a single block, named slots, or a variable-length list — and embed them with `{child}` in the template body.
 
 
 ## Complete example: user dashboard
