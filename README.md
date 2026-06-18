@@ -1,10 +1,35 @@
 # AspNetTemplates
 
-Context-aware HTML template engine for ASP.NET Core that uses C# string interpolation (`FormattableString`) to automatically escape values based on their HTML context.
+HTML templates for ASP.NET Core using plain C# string interpolation.
+
+```csharp
+HtmlTemplate RenderCard(User user) =>
+    Html.Template($"""
+        <div class="{Html.Css(("card", true), ("admin", user.IsAdmin))}">
+            <img src="{user.AvatarUrl}" alt="{user.Name}" />
+            <h2>{user.Name}</h2>
+            {Html.If(user.IsAdmin, $"""<span class="badge">Admin</span>""")}
+            <ul>
+                {Html.Each(user.Roles, role => $"<li>{role}</li>",
+                    $"<li>No roles assigned</li>")}
+            </ul>
+        </div>
+        """);
+```
+
+Every `{value}` is automatically escaped based on its HTML context. The result is an `IActionResult` — return it directly from a controller.
 
 ## Why?
 
-Traditional HTML escaping applies the same encoding everywhere. But HTML has different contexts (element content, attributes, URLs) that require different escaping strategies. `AspNetTemplates` analyzes the template structure and applies the correct encoding automatically, preventing XSS without manual effort.
+It looks like simple string interpolation, but under the hood the engine is designed for production use:
+
+- **Context-aware XSS protection** — Values are escaped differently depending on whether they appear in [element content, attributes, or URLs](#context-aware-escaping). No manual encoding, no forgotten edge cases.
+
+- **Simpler composition than Razor** — Templates are regular C# functions that return `HtmlTemplate`. Compose them by nesting — no partial views, no `@section`, no `_ViewImports`. See [Template Helpers](#template-helpers) and [Advanced Examples](docs/advanced-examples.md).
+
+- **High performance, zero waste** — Format strings are [parsed once and cached](#performance) with zero-copy spans. Rendering is [deferred](#performance) and writes directly to the response stream — no intermediate strings, no double allocations from nested templates.
+
+- **Native ASP.NET Core integration** — `HtmlTemplate` implements `IActionResult`, `IResult`, and `IHtmlContent`. Return templates directly from [MVC controllers and minimal APIs](docs/getting-started.md#using-in-aspnet-core-controllers) without `.ToString()` or `Content()` wrapping.
 
 ## Performance
 
