@@ -140,6 +140,7 @@ The concept of context-aware auto-escaping in template systems was [introduced b
 - **Go** — [`html/template`](https://pkg.go.dev/html/template) in the standard library. Parses the template structure and applies different escaping for HTML, CSS, JavaScript, and URI contexts automatically.
 - **Google Closure Templates** — [Soy templates](https://github.com/google/closure-templates/blob/master/documentation/concepts/auto-escaping.md) with strict contextual auto-escaping enabled by default. Used extensively within Google.
 - **Google safehtml** — [`safehtml/template`](https://pkg.go.dev/github.com/google/safehtml/template) for Go, a hardened version of `html/template` that uses the term "autosanitization" and adds safe HTML types.
+- **Templ** — [`a-h/templ`](https://pkg.go.dev/github.com/a-h/templ), a Go library that defines templates as typed Go functions with context-aware escaping via Google's safe HTML library. Similar philosophy: templates are code, not a separate language.
 - **Python** — [Jinja2](https://jinja.palletsprojects.com/en/stable/api/#autoescaping) provides auto-escaping with `Markup` types to prevent double-escaping, though it does not distinguish between HTML contexts.
 - **Angular** — Built-in contextual sanitization via `DomSanitizer`, distinguishing HTML, styles, URLs, and resource URLs.
 
