@@ -1,5 +1,4 @@
-using System.Net;
-using System.Text;
+using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Html;
 
 namespace AspNetTemplates;
@@ -14,10 +13,15 @@ public class SimpleHtmlTemplate
     /// </summary>
     public static string Render(FormattableString formattable)
     {
-        var result = new StringBuilder();
+        using var writer = new StringWriter();
+        RenderTo(formattable, writer, HtmlEncoder.Default);
+        return writer.ToString();
+    }
+
+    internal static void RenderTo(FormattableString formattable, TextWriter writer, HtmlEncoder encoder)
+    {
         var format = formattable.Format;
         var args = formattable.GetArguments();
-
         var contextAnalyzer = new HtmlContextAnalyzer();
 
         int argIndex = 0;
@@ -34,8 +38,7 @@ public class SimpleHtmlTemplate
 
                 if (argIndex < args.Length)
                 {
-                    var arg = args[argIndex];
-                    AppendWithContext(arg, result, context);
+                    WriteWithContext(args[argIndex], writer, encoder, context);
                     argIndex++;
                 }
 
@@ -48,47 +51,38 @@ public class SimpleHtmlTemplate
             }
             else
             {
-                result.Append(format[i]);
+                writer.Write(format[i]);
             }
         }
-
-        return result.ToString();
     }
 
-    private static void AppendWithContext(object? arg, StringBuilder builder,
-                                         HtmlContext context)
+    internal static void WriteWithContext(object? arg, TextWriter writer,
+                                          HtmlEncoder encoder, HtmlContext context)
     {
-        if (arg == null)
-        {
-            return;
-        }
+        if (arg == null) return;
 
         if (arg is IHtmlContent htmlContent)
         {
-            builder.Append(htmlContent);
+            htmlContent.WriteTo(writer, encoder);
             return;
         }
 
-        var value = arg?.ToString() ?? "";
+        var value = arg.ToString() ?? "";
 
         switch (context)
         {
             case HtmlContext.Content:
-                builder.Append(WebUtility.HtmlEncode(value));
-                break;
             case HtmlContext.Attribute:
-                var encoded = WebUtility.HtmlEncode(value)
-                    .Replace("\"", "&quot;")
-                    .Replace("'", "&#39;");
-                builder.Append(encoded);
+                encoder.Encode(writer, value);
                 break;
             case HtmlContext.UrlAttribute:
                 if (value.StartsWith("javascript:", StringComparison.OrdinalIgnoreCase))
-                    value = "#";
-                builder.Append(WebUtility.UrlEncode(value));
+                    writer.Write('#');
+                else
+                    UrlEncoder.Default.Encode(writer, value);
                 break;
             default:
-                builder.Append(WebUtility.HtmlEncode(value));
+                encoder.Encode(writer, value);
                 break;
         }
     }

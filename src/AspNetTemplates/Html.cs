@@ -1,4 +1,4 @@
-using System.Text;
+using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Html;
 
 namespace AspNetTemplates;
@@ -9,11 +9,11 @@ namespace AspNetTemplates;
 public static class Html
 {
     /// <summary>
-    /// Renders an interpolated string as HTML with context-aware escaping.
-    /// Returns IHtmlContent so the result composes naturally into outer templates.
+    /// Creates a deferred HTML template with context-aware escaping.
+    /// Returns HtmlTemplate which implements IHtmlContent (for composition) and IActionResult (for controllers).
     /// </summary>
-    public static IHtmlContent Template(FormattableString formattable)
-        => new HtmlString(SimpleHtmlTemplate.Render(formattable));
+    public static HtmlTemplate Template(FormattableString formattable)
+        => new HtmlTemplate(formattable);
 
     /// <summary>
     /// Wraps a pre-rendered HTML string as trusted content that won't be double-escaped.
@@ -26,7 +26,7 @@ public static class Html
     public static IHtmlContent If(bool condition, FormattableString content)
     {
         if (!condition) return HtmlString.Empty;
-        return Template(content);
+        return new HtmlTemplate(content);
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ public static class Html
     /// </summary>
     public static IHtmlContent If(bool condition, FormattableString content, FormattableString fallback)
     {
-        return Template(condition ? content : fallback);
+        return new HtmlTemplate(condition ? content : fallback);
     }
 
     /// <summary>
@@ -50,10 +50,11 @@ public static class Html
     /// </summary>
     public static IHtmlContent Each<T>(IEnumerable<T> items, Func<T, FormattableString> template)
     {
-        var sb = new StringBuilder();
-        foreach (var item in items)
-            sb.Append(SimpleHtmlTemplate.Render(template(item)));
-        return new HtmlString(sb.ToString());
+        return new DeferredHtml((writer, encoder) =>
+        {
+            foreach (var item in items)
+                new HtmlTemplate(template(item)).WriteTo(writer, encoder);
+        });
     }
 
     /// <summary>
@@ -62,10 +63,17 @@ public static class Html
     public static IHtmlContent Each<T>(IEnumerable<T> items, Func<T, FormattableString> template,
                                        FormattableString empty)
     {
-        var list = items as IReadOnlyList<T> ?? items.ToList();
-        if (list.Count == 0)
-            return Template(empty);
-        return Each(list, template);
+        return new DeferredHtml((writer, encoder) =>
+        {
+            var list = items as IReadOnlyList<T> ?? items.ToList();
+            if (list.Count == 0)
+            {
+                new HtmlTemplate(empty).WriteTo(writer, encoder);
+                return;
+            }
+            foreach (var item in list)
+                new HtmlTemplate(template(item)).WriteTo(writer, encoder);
+        });
     }
 
     /// <summary>
@@ -73,14 +81,15 @@ public static class Html
     /// </summary>
     public static IHtmlContent Each<T>(IEnumerable<T> items, Func<T, int, FormattableString> template)
     {
-        var sb = new StringBuilder();
-        var index = 0;
-        foreach (var item in items)
+        return new DeferredHtml((writer, encoder) =>
         {
-            sb.Append(SimpleHtmlTemplate.Render(template(item, index)));
-            index++;
-        }
-        return new HtmlString(sb.ToString());
+            int index = 0;
+            foreach (var item in items)
+            {
+                new HtmlTemplate(template(item, index)).WriteTo(writer, encoder);
+                index++;
+            }
+        });
     }
 
     /// <summary>
@@ -89,9 +98,20 @@ public static class Html
     public static IHtmlContent Each<T>(IEnumerable<T> items, Func<T, int, FormattableString> template,
                                        FormattableString empty)
     {
-        var list = items as IReadOnlyList<T> ?? items.ToList();
-        if (list.Count == 0)
-            return Template(empty);
-        return Each(list, template);
+        return new DeferredHtml((writer, encoder) =>
+        {
+            var list = items as IReadOnlyList<T> ?? items.ToList();
+            if (list.Count == 0)
+            {
+                new HtmlTemplate(empty).WriteTo(writer, encoder);
+                return;
+            }
+            int index = 0;
+            foreach (var item in list)
+            {
+                new HtmlTemplate(template(item, index)).WriteTo(writer, encoder);
+                index++;
+            }
+        });
     }
 }
