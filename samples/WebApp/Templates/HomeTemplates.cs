@@ -6,7 +6,7 @@ namespace WebApp.Templates;
 
 public static class HomeTemplates
 {
-    public static IHtmlContent Index(IEnumerable<Feature> features)
+    public static HtmlTemplate Index(IEnumerable<Feature> features)
     {
         return Html.Template($"""
             <section class="hero">
@@ -38,7 +38,7 @@ public static class HomeTemplates
             """);
     }
 
-    static IHtmlContent EscapingDemo()
+    static HtmlTemplate EscapingDemo()
     {
         var userInput = """<img src="x" onerror="alert('xss')">""";
         var maliciousClass = """foo" onclick="alert(1)""";
@@ -74,7 +74,7 @@ public static class HomeTemplates
             """);
     }
 
-    public static IHtmlContent Privacy() =>
+    public static HtmlTemplate Privacy() =>
         Html.Template($"""
             <h1>Privacy Policy</h1>
             <p>This is a demo application for the AspNetTemplates library.</p>

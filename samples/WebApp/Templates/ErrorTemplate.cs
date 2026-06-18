@@ -5,7 +5,7 @@ namespace WebApp.Templates;
 
 public static class ErrorTemplate
 {
-    public static IHtmlContent Render(string? requestId)
+    public static HtmlTemplate Render(string? requestId)
     {
         var showId = !string.IsNullOrEmpty(requestId);
 
