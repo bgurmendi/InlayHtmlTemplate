@@ -37,7 +37,7 @@ Since `Html.Template` returns `IHtmlContent`, and `IHtmlContent` values are inse
 
 ```csharp
 var header = Html.Template($"<h1>{title}</h1>");
-var nav = Html.Template($"<nav><a href=\"/\">Home</a></nav>");
+var nav = Html.Template($"""<nav><a href="/">Home</a></nav>""");
 var page = Html.Template($"<div>{nav}{header}<p>{body}</p></div>");
 ```
 
@@ -54,11 +54,11 @@ public class HomeController : Controller
     public IActionResult Index()
     {
         var userName = GetCurrentUser();
-        var html = Html.Template($@"
-            <div class=""welcome"">
+        var html = Html.Template($"""
+            <div class="welcome">
                 <h1>Welcome, {userName}!</h1>
             </div>
-        ");
+            """);
         return Content(html.ToString(), "text/html");
     }
 }

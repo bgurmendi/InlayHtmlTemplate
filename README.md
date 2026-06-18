@@ -42,15 +42,15 @@ Html.Template($"<p>{text}</p>");
 
 ### Attribute Values
 ```csharp
-var className = "foo\" onclick=\"alert(1)";
-Html.Template($"<div class=\"{className}\">test</div>");
+var className = """foo" onclick="alert(1)""";
+Html.Template($"""<div class="{className}">test</div>""");
 // Attribute is safely escaped, onclick injection is neutralized
 ```
 
 ### URL Attributes (href, src)
 ```csharp
 var url = "javascript:alert(1)";
-Html.Template($"<a href=\"{url}\">click</a>");
+Html.Template($"""<a href="{url}">click</a>""");
 // javascript: URLs are blocked and replaced with #
 ```
 
@@ -60,8 +60,8 @@ The `Html` class provides helpers for common template patterns:
 
 ```csharp
 // Conditional rendering
-Html.If(isAdmin, $"<span class=\"badge\">Admin</span>")
-Html.If(isLoggedIn, $"<span>{name}</span>", $"<a href=\"/login\">Log in</a>")
+Html.If(isAdmin, $"""<span class="badge">Admin</span>""")
+Html.If(isLoggedIn, $"<span>{name}</span>", $"""<a href="/login">Log in</a>""")
 
 // CSS class toggling
 Html.Css(("btn", true), ("active", isActive), ("disabled", isDisabled))
@@ -72,7 +72,7 @@ Html.Each(items, item => $"<li>{item}</li>")
 // List with fallback for empty collections
 Html.Each(items,
     item => $"<li>{item}</li>",
-    $"<li class=\"empty\">No items found.</li>")
+    $"""<li class="empty">No items found.</li>""")
 ```
 
 All helpers return `IHtmlContent` and compose naturally into outer templates. See [Advanced Examples](docs/advanced-examples.md) for composition patterns and complete examples.

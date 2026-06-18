@@ -9,7 +9,7 @@ The primary API for rendering and composing HTML templates. All methods that pro
 Renders an interpolated string as HTML with context-aware escaping.
 
 **Parameters:**
-- `formattable` — A C# interpolated string (`$"..."`). Must be passed directly as an interpolated string, not as a pre-built `string`.
+- `formattable` — A C# interpolated string (`$"..."` or `$"""..."""`). Must be passed directly as an interpolated string, not as a pre-built `string`.
 
 **Returns:** `IHtmlContent` — The rendered HTML. Composes directly into outer templates.
 

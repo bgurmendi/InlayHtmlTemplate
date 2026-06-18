@@ -35,10 +35,10 @@ The natural pattern is functions that return `IHtmlContent`:
 
 ```csharp
 IHtmlContent RenderBadge(string role) =>
-    Html.Template($"<span class=\"badge\">{role}</span>");
+    Html.Template($"""<span class="badge">{role}</span>""");
 
 IHtmlContent RenderCard(string name, string role) =>
-    Html.Template($"<div class=\"card\"><h3>{name}</h3>{RenderBadge(role)}</div>");
+    Html.Template($"""<div class="card"><h3>{name}</h3>{RenderBadge(role)}</div>""");
 
 // Nesting is automatic — RenderBadge returns IHtmlContent, so it composes
 var html = Html.Template($"<section>{RenderCard("Alice", "Admin")}</section>");
@@ -64,12 +64,12 @@ For template-to-template composition, `Html.Template` is enough.
 var isAdmin = true;
 var userName = "Alice";
 
-var html = Html.Template($@"
-    <div class=""user-header"">
+var html = Html.Template($"""
+    <div class="user-header">
         <span>{userName}</span>
-        {Html.If(isAdmin, $"<span class=\"badge badge-admin\">Admin</span>")}
+        {Html.If(isAdmin, $"""<span class="badge badge-admin">Admin</span>""")}
     </div>
-");
+    """);
 ```
 
 When `isAdmin` is `false`, the badge is simply absent — no empty tags, no wrapper divs.
@@ -84,7 +84,7 @@ var userName = "Guest";
 
 var nav = Html.If(isLoggedIn,
     $"<span>Welcome, {userName}</span>",
-    $"<a href=\"/login\">Log in</a>");
+    $"""<a href="/login">Log in</a>""");
 
 var html = Html.Template($"<nav>{nav}</nav>");
 // <nav><a href="/login">Log in</a></nav>
@@ -100,11 +100,13 @@ var isAdmin = true;
 var name = "Alice";
 
 var header = Html.If(isLoggedIn,
-    $@"<div class=""toolbar"">
+    $"""
+    <div class="toolbar">
         <span>{name}</span>
         {Html.If(isAdmin, $"<button>Admin Panel</button>")}
-    </div>",
-    $"<a href=\"/login\">Log in</a>");
+    </div>
+    """,
+    $"""<a href="/login">Log in</a>""");
 ```
 
 
@@ -118,12 +120,12 @@ var isDisabled = false;
 var hasError = true;
 
 var html = Html.Template(
-    $"<button class=\"{Html.Css(
+    $"""<button class="{Html.Css(
         ("btn", true),
         ("btn-primary", isActive),
         ("btn-disabled", isDisabled),
         ("btn-error", hasError)
-    )}\">Submit</button>");
+    )}">Submit</button>""");
 
 // <button class="btn btn-primary btn-error">Submit</button>
 ```
@@ -139,7 +141,7 @@ var tab = "settings";
 var currentTab = "settings";
 
 var html = Html.Template(
-    $"<li class=\"{Html.Css(("nav-link", true), ("active", tab == currentTab))}\">{tab}</li>");
+    $"""<li class="{Html.Css(("nav-link", true), ("active", tab == currentTab))}">{tab}</li>""");
 ```
 
 State-driven styling:
@@ -148,12 +150,12 @@ State-driven styling:
 var status = OrderStatus.Shipped;
 
 var html = Html.Template(
-    $@"<span class=""{Html.Css(
+    $"""<span class="{Html.Css(
         ("badge", true),
         ("badge-warning", status == OrderStatus.Pending),
         ("badge-info", status == OrderStatus.Shipped),
         ("badge-success", status == OrderStatus.Delivered)
-    )}"">{status}</span>");
+    )}">{status}</span>""");
 ```
 
 
@@ -194,17 +196,18 @@ var products = new[]
     new Product("Gadget", 24.50m, "/products/gadget"),
 };
 
-var html = Html.Template($@"
+var html = Html.Template($"""
     <table>
         <thead><tr><th>Product</th><th>Price</th></tr></thead>
         <tbody>
-            {Html.Each(products, p => $@"
+            {Html.Each(products, p => $"""
                 <tr>
-                    <td><a href=""{p.Url}"">{p.Name}</a></td>
+                    <td><a href="{p.Url}">{p.Name}</a></td>
                     <td>${p.Price}</td>
-                </tr>")}
+                </tr>""")}
         </tbody>
-    </table>");
+    </table>
+    """);
 ```
 
 ### Using the index
@@ -215,8 +218,8 @@ The overload with `(item, index)` is useful for zebra striping or numbered lists
 var steps = new[] { "Mix ingredients", "Preheat oven", "Bake 25 min" };
 
 var html = Html.Template(
-    $@"<ol>{Html.Each(steps, (step, i) =>
-        $"<li class=\"{Html.Css(("step", true), ("even", i % 2 == 0))}\">{step}</li>")}</ol>");
+    $"<ol>{Html.Each(steps, (step, i) =>
+        $"""<li class="{Html.Css(("step", true), ("even", i % 2 == 0))}">{step}</li>""")}</ol>");
 ```
 
 
@@ -227,15 +230,16 @@ The three-argument overload renders a fallback template when the collection is e
 ```csharp
 var notifications = Array.Empty<string>();
 
-var html = Html.Template($@"
-    <div class=""notification-panel"">
+var html = Html.Template($"""
+    <div class="notification-panel">
         <h3>Notifications</h3>
         <ul>
             {Html.Each(notifications,
                 n    => $"<li>{n}</li>",
-                $"<li class=\"empty\">You're all caught up!</li>")}
+                $"""<li class="empty">You're all caught up!</li>""")}
         </ul>
-    </div>");
+    </div>
+    """);
 
 // The <ul> contains only: <li class="empty">You're all caught up!</li>
 ```
@@ -255,16 +259,19 @@ record Task(string Title, bool Done);
 
 var tasks = GetUserTasks(); // might be empty
 
-var html = Html.Template($@"
-    <div class=""task-list"">
+var html = Html.Template($"""
+    <div class="task-list">
         {Html.Each(tasks,
-            t => $@"<div class=""{Html.Css(("task", true), ("done", t.Done))}"">
+            t => $"""
+                <div class="{Html.Css(("task", true), ("done", t.Done))}">
                     {Html.If(t.Done,
                         $"<s>{t.Title}</s>",
                         $"<span>{t.Title}</span>")}
-                </div>",
-            $"<p class=\"empty\">No tasks yet. Enjoy your free time!</p>")}
-    </div>");
+                </div>
+                """,
+            $"""<p class="empty">No tasks yet. Enjoy your free time!</p>""")}
+    </div>
+    """);
 ```
 
 
@@ -280,32 +287,36 @@ IHtmlContent RenderDashboard(User user, IEnumerable<Activity> activities)
 {
     var isAdmin = user.Role == "Admin";
 
-    return Html.Template($@"
-        <div class=""dashboard"">
-            <header class=""{Html.Css(("header", true), ("header-admin", isAdmin))}"">
-                <img src=""{user.AvatarUrl}"" alt=""{user.Name}"" />
+    return Html.Template($"""
+        <div class="dashboard">
+            <header class="{Html.Css(("header", true), ("header-admin", isAdmin))}">
+                <img src="{user.AvatarUrl}" alt="{user.Name}" />
                 <h1>{user.Name}</h1>
-                {Html.If(isAdmin, $"<span class=\"role-badge\">Admin</span>")}
+                {Html.If(isAdmin, $"""<span class="role-badge">Admin</span>""")}
             </header>
 
-            <section class=""activity"">
+            <section class="activity">
                 <h2>Recent Activity</h2>
                 <ul>
                     {Html.Each(activities,
-                        a => $@"<li class=""{Html.Css(("activity-item", true), ("unread", !a.IsRead))}"">
+                        a => $"""
+                            <li class="{Html.Css(("activity-item", true), ("unread", !a.IsRead))}">
                                 <span>{a.Description}</span>
                                 <time>{a.When:yyyy-MM-dd}</time>
-                            </li>",
-                        $"<li class=\"empty\">No recent activity.</li>")}
+                            </li>
+                            """,
+                        $"""<li class="empty">No recent activity.</li>""")}
                 </ul>
             </section>
 
-            {Html.If(isAdmin, $@"
-                <section class=""admin-panel"">
+            {Html.If(isAdmin, $"""
+                <section class="admin-panel">
                     <h2>Admin Tools</h2>
                     <button>Manage Users</button>
                     <button>View Logs</button>
-                </section>")}
-        </div>");
+                </section>
+                """)}
+        </div>
+        """);
 }
 ```

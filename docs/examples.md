@@ -9,7 +9,7 @@ public static class PageLayout
 {
     public static IHtmlContent Render(string title, IHtmlContent bodyContent)
     {
-        return Html.Template($@"
+        return Html.Template($"""
             <!DOCTYPE html>
             <html>
             <head>
@@ -19,7 +19,7 @@ public static class PageLayout
                 {bodyContent}
             </body>
             </html>
-        ");
+            """);
     }
 }
 
@@ -36,14 +36,14 @@ var bio = user.Bio;          // "I love C# & .NET"
 var avatar = user.AvatarUrl; // "https://example.com/alice.jpg"
 var website = user.Website;  // "https://alice.dev"
 
-var html = Html.Template($@"
-    <div class=""profile-card"">
-        <img src=""{avatar}"" alt=""{name}"" />
+var html = Html.Template($"""
+    <div class="profile-card">
+        <img src="{avatar}" alt="{name}" />
         <h2>{name}</h2>
         <p>{bio}</p>
-        <a href=""{website}"">Website</a>
+        <a href="{website}">Website</a>
     </div>
-");
+    """);
 ```
 
 Each value is escaped according to its position:
@@ -74,43 +74,34 @@ var html = RenderList(new[] { "First", "<script>xss</script>", "Third" });
 ## Dynamic Table from Data
 
 ```csharp
-IHtmlContent RenderRow(string name, string email, string role) =>
-    Html.Template($@"
-        <tr>
-            <td>{name}</td>
-            <td><a href=""mailto:{email}"">{email}</a></td>
-            <td>{role}</td>
-        </tr>
-    ");
-
 IHtmlContent RenderTable(IEnumerable<User> users) =>
-    Html.Template($@"
+    Html.Template($"""
         <table>
             <thead>
                 <tr><th>Name</th><th>Email</th><th>Role</th></tr>
             </thead>
-            <tbody>{Html.Each(users, u => $@"
+            <tbody>{Html.Each(users, u => $"""
                 <tr>
                     <td>{u.Name}</td>
-                    <td><a href=""mailto:{u.Email}"">{u.Email}</a></td>
+                    <td><a href="mailto:{u.Email}">{u.Email}</a></td>
                     <td>{u.Role}</td>
-                </tr>")}</tbody>
+                </tr>""")}</tbody>
         </table>
-    ");
+        """);
 ```
 
 ## Form with CSRF Protection
 
 ```csharp
 IHtmlContent RenderForm(string action, string csrfToken) =>
-    Html.Template($@"
-        <form method=""post"" action=""{action}"">
-            <input type=""hidden"" name=""__RequestVerificationToken"" value=""{csrfToken}"" />
-            <label for=""name"">Name:</label>
-            <input type=""text"" id=""name"" name=""name"" />
-            <button type=""submit"">Submit</button>
+    Html.Template($"""
+        <form method="post" action="{action}">
+            <input type="hidden" name="__RequestVerificationToken" value="{csrfToken}" />
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" />
+            <button type="submit">Submit</button>
         </form>
-    ");
+        """);
 ```
 
 ## Integration with ASP.NET Core Middleware
@@ -123,11 +114,11 @@ app.Use(async (context, next) =>
     if (context.Response.StatusCode == 404)
     {
         var path = context.Request.Path.ToString();
-        var html = Html.Template($@"
+        var html = Html.Template($"""
             <h1>Page Not Found</h1>
             <p>The page <code>{path}</code> does not exist.</p>
-            <a href=""/"">Go home</a>
-        ");
+            <a href="/">Go home</a>
+            """);
 
         context.Response.ContentType = "text/html";
         await context.Response.WriteAsync(html.ToString());
