@@ -193,4 +193,72 @@ public class HtmlHelpersTests
 
         Assert.Equal("<div><h1>Alice</h1></div>", page);
     }
+
+    // --- If fallback: verify correct branch renders ---
+
+    [Fact]
+    public void If_WithFallback_TrueRendersContent()
+    {
+        var a = "yes";
+        var b = "no";
+        var result = Inlay.If(true, $"<b>{a}</b>", $"<i>{b}</i>");
+        var html = Inlay.Template($"{result}").ToString();
+
+        Assert.Contains("yes", html);
+        Assert.DoesNotContain("no", html);
+    }
+
+    // --- Each with IReadOnlyList passthrough ---
+
+    [Fact]
+    public void Each_WithReadOnlyList_DoesNotMaterialize()
+    {
+        IReadOnlyList<string> items = new[] { "A", "B" };
+        var list = Inlay.Each(items,
+            item => $"<li>{item}</li>",
+            $"<li>empty</li>");
+        var result = Inlay.Template($"<ul>{list}</ul>").ToString();
+
+        Assert.Contains("<li>A</li>", result);
+        Assert.Contains("<li>B</li>", result);
+        Assert.DoesNotContain("empty", result);
+    }
+
+    // --- Each with index + fallback (was NoCoverage) ---
+
+    [Fact]
+    public void Each_WithIndexAndFallback_ShowsFallbackWhenEmpty()
+    {
+        var items = Array.Empty<string>();
+        var list = Inlay.Each(items,
+            (item, i) => $"<li>{i}: {item}</li>",
+            $"""<li class="empty">Nothing here</li>""");
+        var result = Inlay.Template($"<ul>{list}</ul>").ToString();
+
+        Assert.Contains("Nothing here", result);
+    }
+
+    [Fact]
+    public void Each_WithIndexAndFallback_RendersItemsWhenNotEmpty()
+    {
+        var items = new[] { "X", "Y" };
+        var list = Inlay.Each(items,
+            (item, i) => $"<li>{i}: {item}</li>",
+            $"<li>empty</li>");
+        var result = Inlay.Template($"<ul>{list}</ul>").ToString();
+
+        Assert.Contains("0: X", result);
+        Assert.Contains("1: Y", result);
+        Assert.DoesNotContain("empty", result);
+    }
+
+    [Fact]
+    public void Each_WithIndex_IncrementsCorrectly()
+    {
+        var items = new[] { "a", "b", "c" };
+        var list = Inlay.Each(items, (item, i) => $"[{i}]");
+        var result = Inlay.Template($"{list}").ToString();
+
+        Assert.Equal("[0][1][2]", result);
+    }
 }
