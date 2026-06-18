@@ -9,9 +9,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A1B2C3D4
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{A1B2C3D4-0003-0000-0000-000000000001}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetTemplates", "src\AspNetTemplates\AspNetTemplates.csproj", "{B1C2D3E4-0001-0000-0000-000000000001}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InlayHtmlTemplate", "src\InlayHtmlTemplate\InlayHtmlTemplate.csproj", "{B1C2D3E4-0001-0000-0000-000000000001}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetTemplates.Tests", "tests\AspNetTemplates.Tests\AspNetTemplates.Tests.csproj", "{B1C2D3E4-0002-0000-0000-000000000001}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InlayHtmlTemplate.Tests", "tests\InlayHtmlTemplate.Tests\InlayHtmlTemplate.Tests.csproj", "{B1C2D3E4-0002-0000-0000-000000000001}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp", "samples\WebApp\WebApp.csproj", "{B1C2D3E4-0003-0000-0000-000000000001}"
 EndProject

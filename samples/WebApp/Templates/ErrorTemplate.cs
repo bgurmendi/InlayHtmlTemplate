@@ -1,18 +1,18 @@
-using AspNetTemplates;
+using InlayHtmlTemplate;
 using Microsoft.AspNetCore.Html;
 
 namespace WebApp.Templates;
 
 public static class ErrorTemplate
 {
-    public static HtmlTemplate Render(string? requestId)
+    public static InlayTemplate Render(string? requestId)
     {
         var showId = !string.IsNullOrEmpty(requestId);
 
-        return Html.Template($"""
+        return Inlay.Template($"""
             <h1 class="error-title">Error</h1>
             <p>An error occurred while processing your request.</p>
-            {Html.If(showId, $"""
+            {Inlay.If(showId, $"""
                 <p><strong>Request ID:</strong> <code>{requestId}</code></p>
                 """)}
             """);

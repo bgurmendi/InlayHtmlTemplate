@@ -1,7 +1,7 @@
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Html;
 
-namespace AspNetTemplates;
+namespace InlayHtmlTemplate;
 
 internal sealed class DeferredHtml : IHtmlContent
 {

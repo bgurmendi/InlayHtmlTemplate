@@ -1,80 +1,80 @@
 # API Reference
 
-## Html (static class)
+## Inlay (static class)
 
 The primary API for rendering and composing HTML templates.
 
-### `Html.Template(FormattableString formattable)`
+### `Inlay.Template(FormattableString formattable)`
 
 Creates a deferred HTML template with context-aware escaping. Rendering happens on demand when the result is written to a response or converted to string.
 
 **Parameters:**
 - `formattable` — A C# interpolated string (`$"..."` or `$"""..."""`). Must be passed directly as an interpolated string, not as a pre-built `string`.
 
-**Returns:** `HtmlTemplate` — Implements `IHtmlContent` (for composition), `IActionResult` (for MVC controllers), and `IResult` (for minimal APIs). Can be returned directly from controller actions.
+**Returns:** `InlayTemplate` — Implements `IHtmlContent` (for composition), `IActionResult` (for MVC controllers), and `IResult` (for minimal APIs). Can be returned directly from controller actions.
 
 **Important:** The method signature uses `FormattableString`, which means you must pass an interpolated string literal directly. Assigning the interpolated string to a `string` variable first will lose the template structure:
 
 ```csharp
 // Correct - FormattableString is preserved
-var html = Html.Template($"<p>{userInput}</p>");
+var html = Inlay.Template($"<p>{userInput}</p>");
 
 // Wrong - this becomes a regular string, no escaping happens
 string template = $"<p>{userInput}</p>";
-// Html.Template(template); // Won't compile
+// Inlay.Template(template); // Won't compile
 ```
 
-### `Html.Raw(string html)`
+### `Inlay.Raw(string html)`
 
 Wraps a pre-rendered HTML string as trusted `IHtmlContent`. Use for HTML coming from external sources (markdown renderers, sanitizers, etc.).
 
 **Returns:** `IHtmlContent`
 
-### `Html.If(bool condition, FormattableString content)`
+### `Inlay.If(bool condition, FormattableString content)`
 
 Renders the template only when `condition` is `true`. Returns `HtmlString.Empty` otherwise.
 
 **Returns:** `IHtmlContent`
 
-### `Html.If(bool condition, FormattableString content, FormattableString fallback)`
+### `Inlay.If(bool condition, FormattableString content, FormattableString fallback)`
 
 Renders `content` when `true`, `fallback` when `false`.
 
 **Returns:** `IHtmlContent`
 
-### `Html.Css(params (string className, bool active)[] classes)`
+### `Inlay.Css(params (string className, bool active)[] classes)`
 
 Builds a space-separated CSS class string including only entries where `active` is `true`.
 
 **Returns:** `string` — A plain string (not `IHtmlContent`), so the value goes through normal attribute escaping when used inside a template.
 
-### `Html.Each<T>(IEnumerable<T> items, Func<T, FormattableString> template)`
+### `Inlay.Each<T>(IEnumerable<T> items, Func<T, FormattableString> template)`
 
 Renders the template for each item in the collection and concatenates the results.
 
 **Returns:** `IHtmlContent`
 
-### `Html.Each<T>(IEnumerable<T> items, Func<T, FormattableString> template, FormattableString empty)`
+### `Inlay.Each<T>(IEnumerable<T> items, Func<T, FormattableString> template, FormattableString empty)`
 
 Same as above, but renders the `empty` template when the collection has no elements. The collection is materialized once to check emptiness.
 
 **Returns:** `IHtmlContent`
 
-### `Html.Each<T>(IEnumerable<T> items, Func<T, int, FormattableString> template)`
+### `Inlay.Each<T>(IEnumerable<T> items, Func<T, int, FormattableString> template)`
 
 Like `Each`, but the lambda also receives the zero-based index of each item.
 
 **Returns:** `IHtmlContent`
 
-### `Html.Each<T>(IEnumerable<T> items, Func<T, int, FormattableString> template, FormattableString empty)`
+### `Inlay.Each<T>(IEnumerable<T> items, Func<T, int, FormattableString> template, FormattableString empty)`
 
 Index variant with empty-collection fallback.
 
 **Returns:** `IHtmlContent`
 
-## HtmlTemplate (class)
+## InlayTemplate (class)
 
-The concrete type returned by `Html.Template`. Stores a `FormattableString` and defers rendering until needed. Nested templates render recursively onto the same `TextWriter` — no intermediate string allocations.
+The concrete type returned by `Inlay.Template`. Stores a `FormattableString` and defers rendering until needed. Nested templates render recursively onto the same `TextWriter` — no intermediate string allocations.
 
 **Implements:** `IHtmlContent`, `IActionResult`, `IResult`
 
@@ -93,7 +93,7 @@ After warmup, every render reuses the cached analysis and only performs encoding
 
 ## SimpleHtmlTemplate
 
-Low-level rendering engine. Returns `string` instead of `HtmlTemplate`. Prefer `Html.Template` for application code.
+Low-level rendering engine. Returns `string` instead of `InlayTemplate`. Prefer `Inlay.Template` for application code.
 
 ### `SimpleHtmlTemplate.Render(FormattableString formattable)`
 
@@ -140,10 +140,10 @@ This prevents attribute breakout attacks where a value like `foo" onclick="alert
 URL encoding via `UrlEncoder.Default`, with an additional check: values starting with `javascript:` (case-insensitive) are replaced with `#` to prevent script injection through URL attributes.
 
 ### IHtmlContent Bypass
-Objects implementing `Microsoft.AspNetCore.Html.IHtmlContent` are inserted without escaping by calling `WriteTo` on the same `TextWriter`. This is how template composition works — `HtmlTemplate` implements `IHtmlContent`, so nested templates render recursively without intermediate strings:
+Objects implementing `Microsoft.AspNetCore.Html.IHtmlContent` are inserted without escaping by calling `WriteTo` on the same `TextWriter`. This is how template composition works — `InlayTemplate` implements `IHtmlContent`, so nested templates render recursively without intermediate strings:
 
 ```csharp
-var inner = Html.Template($"<span>{name}</span>");
-var outer = Html.Template($"<div>{inner}</div>");
+var inner = Inlay.Template($"<span>{name}</span>");
+var outer = Inlay.Template($"<div>{inner}</div>");
 // inner is IHtmlContent → inserted as-is, no double-escaping
 ```

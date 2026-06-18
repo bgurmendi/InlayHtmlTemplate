@@ -4,14 +4,14 @@
     <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>AspNetTemplates</RootNamespace>
+    <RootNamespace>InlayHtmlTemplate</RootNamespace>
 
     <!-- NuGet Package Metadata -->
-    <PackageId>AspNetTemplates</PackageId>
+    <PackageId>InlayHtmlTemplate</PackageId>
     <Version>0.1.0</Version>
-    <Authors>AspNetTemplates Contributors</Authors>
+    <Authors>InlayHtmlTemplate Contributors</Authors>
     <Description>Context-aware HTML template engine for ASP.NET Core using C# string interpolation. Automatically escapes interpolated values based on HTML context (content, attributes, URLs) to prevent XSS.</Description>
-    <PackageTags>aspnet;html;template;xss;security;interpolation;razor-alternative</PackageTags>
+    <PackageTags>inlay;html;template;xss;security;interpolation;aspnet;razor-alternative</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryType>git</RepositoryType>

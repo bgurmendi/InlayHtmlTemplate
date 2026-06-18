@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text.Encodings.Web;
 
-namespace AspNetTemplates;
+namespace InlayHtmlTemplate;
 
 /// <summary>
 /// Pre-analyzed template structure. Stores literal spans into the original format string

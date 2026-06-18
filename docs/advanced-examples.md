@@ -4,26 +4,26 @@ Template composition, conditionals, class toggling, and list iteration. For basi
 
 ## How template composition works
 
-`Html.Template` accepts a `FormattableString` (a C# interpolated string `$"..."`), escapes each interpolated value according to its HTML context, and returns `HtmlTemplate`.
+`Inlay.Template` accepts a `FormattableString` (a C# interpolated string `$"..."`), escapes each interpolated value according to its HTML context, and returns `InlayTemplate`.
 
-The key to composition: **`IHtmlContent` values inside a template are inserted as-is, without escaping.** Since `Html.Template` returns `HtmlTemplate` (which implements `IHtmlContent`), templates compose naturally:
+The key to composition: **`IHtmlContent` values inside a template are inserted as-is, without escaping.** Since `Inlay.Template` returns `InlayTemplate` (which implements `IHtmlContent`), templates compose naturally:
 
 ```csharp
 var item = "Bread & butter";
-var li = Html.Template($"<li>{item}</li>");
+var li = Inlay.Template($"<li>{item}</li>");
 // li contains: <li>Bread &amp; butter</li>    ← already safe HTML, as IHtmlContent
 
-var result = Html.Template($"<ul>{li}</ul>");
+var result = Inlay.Template($"<ul>{li}</ul>");
 // result contains: <ul><li>Bread &amp; butter</li></ul>    ← no double-escaping
 ```
 
-No wrapping, no `Html.Raw`, no `HtmlString` — just embed one template result inside another. This works because `HtmlTemplate` implements `IHtmlContent`, and the engine knows not to re-escape it.
+No wrapping, no `Inlay.Raw`, no `HtmlString` — just embed one template result inside another. This works because `InlayTemplate` implements `IHtmlContent`, and the engine knows not to re-escape it.
 
 By contrast, a plain `string` is always escaped (safe by default):
 
 ```csharp
 var userInput = "<b>bold</b>";
-Html.Template($"<p>{userInput}</p>");
+Inlay.Template($"<p>{userInput}</p>");
 // <p>&lt;b&gt;bold&lt;/p&gt;    ← string is escaped
 ```
 
@@ -33,43 +33,43 @@ Html.Template($"<p>{userInput}</p>");
 
 ### Building reusable components
 
-The natural pattern is functions that return `HtmlTemplate`:
+The natural pattern is functions that return `InlayTemplate`:
 
 ```csharp
-HtmlTemplate RenderBadge(string role) =>
-    Html.Template($"""<span class="badge">{role}</span>""");
+InlayTemplate RenderBadge(string role) =>
+    Inlay.Template($"""<span class="badge">{role}</span>""");
 
-HtmlTemplate RenderCard(string name, string role) =>
-    Html.Template($"""<div class="card"><h3>{name}</h3>{RenderBadge(role)}</div>""");
+InlayTemplate RenderCard(string name, string role) =>
+    Inlay.Template($"""<div class="card"><h3>{name}</h3>{RenderBadge(role)}</div>""");
 
-// Nesting is automatic — RenderBadge returns HtmlTemplate (IHtmlContent), so it composes
-var html = Html.Template($"<section>{RenderCard("Alice", "Admin")}</section>");
+// Nesting is automatic — RenderBadge returns InlayTemplate (IHtmlContent), so it composes
+var html = Inlay.Template($"<section>{RenderCard("Alice", "Admin")}</section>");
 ```
 
-### When you still need Html.Raw
+### When you still need Inlay.Raw
 
-`Html.Raw` is for HTML strings that come from **outside** the template system — a markdown renderer, a sanitizer, a database field with trusted HTML:
+`Inlay.Raw` is for HTML strings that come from **outside** the template system — a markdown renderer, a sanitizer, a database field with trusted HTML:
 
 ```csharp
 var markdownHtml = markdownRenderer.ToHtml(userMarkdown);
-var page = Html.Template($"<article>{Html.Raw(markdownHtml)}</article>");
+var page = Inlay.Template($"<article>{Inlay.Raw(markdownHtml)}</article>");
 ```
 
-For template-to-template composition, `Html.Template` is enough.
+For template-to-template composition, `Inlay.Template` is enough.
 
 
-## Conditional fragments with `Html.If`
+## Conditional fragments with `Inlay.If`
 
-`Html.If` renders a template only when the condition is `true`. It returns `IHtmlContent`, composing into any outer template.
+`Inlay.If` renders a template only when the condition is `true`. It returns `IHtmlContent`, composing into any outer template.
 
 ```csharp
 var isAdmin = true;
 var userName = "Alice";
 
-var html = Html.Template($"""
+var html = Inlay.Template($"""
     <div class="user-header">
         <span>{userName}</span>
-        {Html.If(isAdmin, $"""<span class="badge badge-admin">Admin</span>""")}
+        {Inlay.If(isAdmin, $"""<span class="badge badge-admin">Admin</span>""")}
     </div>
     """);
 ```
@@ -84,45 +84,45 @@ The two-argument overload provides an else branch:
 var isLoggedIn = false;
 var userName = "Guest";
 
-var nav = Html.If(isLoggedIn,
+var nav = Inlay.If(isLoggedIn,
     $"<span>Welcome, {userName}</span>",
     $"""<a href="/login">Log in</a>""");
 
-var html = Html.Template($"<nav>{nav}</nav>");
+var html = Inlay.Template($"<nav>{nav}</nav>");
 // <nav><a href="/login">Log in</a></nav>
 ```
 
 ### Nesting conditionals
 
-Since `Html.If` returns `IHtmlContent`, you can nest them:
+Since `Inlay.If` returns `IHtmlContent`, you can nest them:
 
 ```csharp
 var isLoggedIn = true;
 var isAdmin = true;
 var name = "Alice";
 
-var header = Html.If(isLoggedIn,
+var header = Inlay.If(isLoggedIn,
     $"""
     <div class="toolbar">
         <span>{name}</span>
-        {Html.If(isAdmin, $"<button>Admin Panel</button>")}
+        {Inlay.If(isAdmin, $"<button>Admin Panel</button>")}
     </div>
     """,
     $"""<a href="/login">Log in</a>""");
 ```
 
 
-## Class toggling with `Html.Css`
+## Class toggling with `Inlay.Css`
 
-`Html.Css` builds a class string from a list of `(className, active)` tuples. Only classes where `active` is `true` are included.
+`Inlay.Css` builds a class string from a list of `(className, active)` tuples. Only classes where `active` is `true` are included.
 
 ```csharp
 var isActive = true;
 var isDisabled = false;
 var hasError = true;
 
-var html = Html.Template(
-    $"""<button class="{Html.Css(
+var html = Inlay.Template(
+    $"""<button class="{Inlay.Css(
         ("btn", true),
         ("btn-primary", isActive),
         ("btn-disabled", isDisabled),
@@ -132,7 +132,7 @@ var html = Html.Template(
 // <button class="btn btn-primary btn-error">Submit</button>
 ```
 
-`Html.Css` returns a plain `string` (not `IHtmlContent`), so the value goes through normal attribute escaping. Since CSS class names don't contain special characters, this is transparent.
+`Inlay.Css` returns a plain `string` (not `IHtmlContent`), so the value goes through normal attribute escaping. Since CSS class names don't contain special characters, this is transparent.
 
 ### Common patterns
 
@@ -142,8 +142,8 @@ Toggling a single class:
 var tab = "settings";
 var currentTab = "settings";
 
-var html = Html.Template(
-    $"""<li class="{Html.Css(("nav-link", true), ("active", tab == currentTab))}">{tab}</li>""");
+var html = Inlay.Template(
+    $"""<li class="{Inlay.Css(("nav-link", true), ("active", tab == currentTab))}">{tab}</li>""");
 ```
 
 State-driven styling:
@@ -151,8 +151,8 @@ State-driven styling:
 ```csharp
 var status = OrderStatus.Shipped;
 
-var html = Html.Template(
-    $"""<span class="{Html.Css(
+var html = Inlay.Template(
+    $"""<span class="{Inlay.Css(
         ("badge", true),
         ("badge-warning", status == OrderStatus.Pending),
         ("badge-info", status == OrderStatus.Shipped),
@@ -161,15 +161,15 @@ var html = Html.Template(
 ```
 
 
-## Iterating lists with `Html.Each`
+## Iterating lists with `Inlay.Each`
 
-`Html.Each` renders a template for every item in a collection. It returns `IHtmlContent`, composing into any outer template.
+`Inlay.Each` renders a template for every item in a collection. It returns `IHtmlContent`, composing into any outer template.
 
 ```csharp
 var fruits = new[] { "Apple", "Banana", "Cherry" };
 
-var html = Html.Template(
-    $"<ul>{Html.Each(fruits, fruit => $"<li>{fruit}</li>")}</ul>");
+var html = Inlay.Template(
+    $"<ul>{Inlay.Each(fruits, fruit => $"<li>{fruit}</li>")}</ul>");
 
 // <ul><li>Apple</li><li>Banana</li><li>Cherry</li></ul>
 ```
@@ -179,8 +179,8 @@ Escaping works per-item — if a value contains HTML, it's escaped individually:
 ```csharp
 var items = new[] { "Safe text", "<img src=x onerror=alert(1)>" };
 
-var html = Html.Template(
-    $"<ul>{Html.Each(items, item => $"<li>{item}</li>")}</ul>");
+var html = Inlay.Template(
+    $"<ul>{Inlay.Each(items, item => $"<li>{item}</li>")}</ul>");
 
 // <ul><li>Safe text</li><li>&lt;img src=x onerror=alert(1)&gt;</li></ul>
 ```
@@ -198,11 +198,11 @@ var products = new[]
     new Product("Gadget", 24.50m, "/products/gadget"),
 };
 
-var html = Html.Template($"""
+var html = Inlay.Template($"""
     <table>
         <thead><tr><th>Product</th><th>Price</th></tr></thead>
         <tbody>
-            {Html.Each(products, p => $"""
+            {Inlay.Each(products, p => $"""
                 <tr>
                     <td><a href="{p.Url}">{p.Name}</a></td>
                     <td>${p.Price}</td>
@@ -220,24 +220,24 @@ The overload with `(item, index)` is useful for zebra striping or numbered lists
 ```csharp
 var steps = new[] { "Mix ingredients", "Preheat oven", "Bake 25 min" };
 
-var html = Html.Template(
-    $"<ol>{Html.Each(steps, (step, i) =>
-        $"""<li class="{Html.Css(("step", true), ("even", i % 2 == 0))}">{step}</li>""")}</ol>");
+var html = Inlay.Template(
+    $"<ol>{Inlay.Each(steps, (step, i) =>
+        $"""<li class="{Inlay.Css(("step", true), ("even", i % 2 == 0))}">{step}</li>""")}</ol>");
 ```
 
 
-## Empty list fallback with `Html.Each`
+## Empty list fallback with `Inlay.Each`
 
 The three-argument overload renders a fallback template when the collection is empty:
 
 ```csharp
 var notifications = Array.Empty<string>();
 
-var html = Html.Template($"""
+var html = Inlay.Template($"""
     <div class="notification-panel">
         <h3>Notifications</h3>
         <ul>
-            {Html.Each(notifications,
+            {Inlay.Each(notifications,
                 n => $"<li>{n}</li>",
                 $"""<li class="empty">You're all caught up!</li>""")}
         </ul>
@@ -262,12 +262,12 @@ record Task(string Title, bool Done);
 
 var tasks = GetUserTasks(); // might be empty
 
-var html = Html.Template($"""
+var html = Inlay.Template($"""
     <div class="task-list">
-        {Html.Each(tasks,
+        {Inlay.Each(tasks,
             t => $"""
-                <div class="{Html.Css(("task", true), ("done", t.Done))}">
-                    {Html.If(t.Done,
+                <div class="{Inlay.Css(("task", true), ("done", t.Done))}">
+                    {Inlay.If(t.Done,
                         $"<s>{t.Title}</s>",
                         $"<span>{t.Title}</span>")}
                 </div>
@@ -280,15 +280,15 @@ var html = Html.Template($"""
 
 ## Passing content blocks to a template
 
-A template function can receive an `IHtmlContent` parameter and embed it with `{body}`. The caller builds that body with its own `Html.Template` call — which can be as complex as needed. This is how layout/content composition works in practice.
+A template function can receive an `IHtmlContent` parameter and embed it with `{body}`. The caller builds that body with its own `Inlay.Template` call — which can be as complex as needed. This is how layout/content composition works in practice.
 
 ### Layout with a full page body
 
 A layout function wraps its content with the HTML shell:
 
 ```csharp
-HtmlTemplate Layout(string title, IHtmlContent body) =>
-    Html.Template($"""
+InlayTemplate Layout(string title, IHtmlContent body) =>
+    Inlay.Template($"""
         <!DOCTYPE html>
         <html>
         <head><title>{title}</title></head>
@@ -309,22 +309,22 @@ The page function builds a complex body and passes it to the layout. The body it
 ```csharp
 record Product(string Name, decimal Price, string ImageUrl, bool InStock);
 
-HtmlTemplate ProductPage(IEnumerable<Product> products, string? search)
+InlayTemplate ProductPage(IEnumerable<Product> products, string? search)
 {
-    var body = Html.Template($"""
+    var body = Inlay.Template($"""
         <h1>Products</h1>
 
-        {Html.If(search != null, $"""
+        {Inlay.If(search != null, $"""
             <p class="search-info">Showing results for: <strong>{search}</strong></p>
             """)}
 
         <div class="product-grid">
-            {Html.Each(products, p => $"""
-                <div class="{Html.Css(("product", true), ("out-of-stock", !p.InStock))}">
+            {Inlay.Each(products, p => $"""
+                <div class="{Inlay.Css(("product", true), ("out-of-stock", !p.InStock))}">
                     <img src="{p.ImageUrl}" alt="{p.Name}" />
                     <h3>{p.Name}</h3>
                     <span class="price">${p.Price}</span>
-                    {Html.If(p.InStock,
+                    {Inlay.If(p.InStock,
                         $"""<button>Add to cart</button>""",
                         $"""<span class="sold-out">Sold out</span>""")}
                 </div>
@@ -337,7 +337,7 @@ HtmlTemplate ProductPage(IEnumerable<Product> products, string? search)
 }
 ```
 
-The controller returns it directly — `HtmlTemplate` is an `IActionResult`:
+The controller returns it directly — `InlayTemplate` is an `IActionResult`:
 
 ```csharp
 public IActionResult Index(string? search)
@@ -352,12 +352,12 @@ public IActionResult Index(string? search)
 When a wrapper needs more than one block, use several `IHtmlContent` parameters:
 
 ```csharp
-HtmlTemplate Card(string title, IHtmlContent body, IHtmlContent? actions = null) =>
-    Html.Template($"""
+InlayTemplate Card(string title, IHtmlContent body, IHtmlContent? actions = null) =>
+    Inlay.Template($"""
         <div class="card">
             <div class="card-header"><h3>{title}</h3></div>
             <div class="card-body">{body}</div>
-            {Html.If(actions != null, $"""
+            {Inlay.If(actions != null, $"""
                 <div class="card-footer">{actions}</div>
                 """)}
         </div>
@@ -367,14 +367,14 @@ HtmlTemplate Card(string title, IHtmlContent body, IHtmlContent? actions = null)
 Each slot is built independently and passed in:
 
 ```csharp
-var stats = Html.Template($"""
+var stats = Inlay.Template($"""
     <dl>
         <dt>Orders</dt><dd>{orderCount}</dd>
         <dt>Revenue</dt><dd>${revenue:F2}</dd>
     </dl>
     """);
 
-var buttons = Html.Template($"""
+var buttons = Inlay.Template($"""
     <a href="/orders">View all</a>
     <a href="/orders/export">Export CSV</a>
     """);
@@ -391,24 +391,24 @@ This example combines all the helpers in a realistic scenario:
 record User(string Name, string Role, string AvatarUrl);
 record Activity(string Description, DateTime When, bool IsRead);
 
-HtmlTemplate RenderDashboard(User user, IEnumerable<Activity> activities)
+InlayTemplate RenderDashboard(User user, IEnumerable<Activity> activities)
 {
     var isAdmin = user.Role == "Admin";
 
-    return Html.Template($"""
+    return Inlay.Template($"""
         <div class="dashboard">
-            <header class="{Html.Css(("header", true), ("header-admin", isAdmin))}">
+            <header class="{Inlay.Css(("header", true), ("header-admin", isAdmin))}">
                 <img src="{user.AvatarUrl}" alt="{user.Name}" />
                 <h1>{user.Name}</h1>
-                {Html.If(isAdmin, $"""<span class="role-badge">Admin</span>""")}
+                {Inlay.If(isAdmin, $"""<span class="role-badge">Admin</span>""")}
             </header>
 
             <section class="activity">
                 <h2>Recent Activity</h2>
                 <ul>
-                    {Html.Each(activities,
+                    {Inlay.Each(activities,
                         a => $"""
-                            <li class="{Html.Css(("activity-item", true), ("unread", !a.IsRead))}">
+                            <li class="{Inlay.Css(("activity-item", true), ("unread", !a.IsRead))}">
                                 <span>{a.Description}</span>
                                 <time>{a.When:yyyy-MM-dd}</time>
                             </li>
@@ -417,7 +417,7 @@ HtmlTemplate RenderDashboard(User user, IEnumerable<Activity> activities)
                 </ul>
             </section>
 
-            {Html.If(isAdmin, $"""
+            {Inlay.If(isAdmin, $"""
                 <section class="admin-panel">
                     <h2>Admin Tools</h2>
                     <button>Manage Users</button>

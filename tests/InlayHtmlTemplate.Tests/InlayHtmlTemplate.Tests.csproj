@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../src/AspNetTemplates/AspNetTemplates.csproj" />
+    <ProjectReference Include="../../src/InlayHtmlTemplate/InlayHtmlTemplate.csproj" />
   </ItemGroup>
 
 </Project>

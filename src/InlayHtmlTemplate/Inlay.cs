@@ -1,19 +1,19 @@
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Html;
 
-namespace AspNetTemplates;
+namespace InlayHtmlTemplate;
 
 /// <summary>
 /// Helper methods for composing HTML templates: conditionals, class toggling, and list iteration.
 /// </summary>
-public static class Html
+public static class Inlay
 {
     /// <summary>
     /// Creates a deferred HTML template with context-aware escaping.
-    /// Returns HtmlTemplate which implements IHtmlContent (for composition) and IActionResult (for controllers).
+    /// Returns InlayTemplate which implements IHtmlContent (for composition) and IActionResult (for controllers).
     /// </summary>
-    public static HtmlTemplate Template(FormattableString formattable)
-        => new HtmlTemplate(formattable);
+    public static InlayTemplate Template(FormattableString formattable)
+        => new InlayTemplate(formattable);
 
     /// <summary>
     /// Wraps a pre-rendered HTML string as trusted content that won't be double-escaped.
@@ -26,7 +26,7 @@ public static class Html
     public static IHtmlContent If(bool condition, FormattableString content)
     {
         if (!condition) return HtmlString.Empty;
-        return new HtmlTemplate(content);
+        return new InlayTemplate(content);
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ public static class Html
     /// </summary>
     public static IHtmlContent If(bool condition, FormattableString content, FormattableString fallback)
     {
-        return new HtmlTemplate(condition ? content : fallback);
+        return new InlayTemplate(condition ? content : fallback);
     }
 
     /// <summary>
@@ -53,7 +53,7 @@ public static class Html
         return new DeferredHtml((writer, encoder) =>
         {
             foreach (var item in items)
-                new HtmlTemplate(template(item)).WriteTo(writer, encoder);
+                new InlayTemplate(template(item)).WriteTo(writer, encoder);
         });
     }
 
@@ -68,11 +68,11 @@ public static class Html
             var list = items as IReadOnlyList<T> ?? items.ToList();
             if (list.Count == 0)
             {
-                new HtmlTemplate(empty).WriteTo(writer, encoder);
+                new InlayTemplate(empty).WriteTo(writer, encoder);
                 return;
             }
             foreach (var item in list)
-                new HtmlTemplate(template(item)).WriteTo(writer, encoder);
+                new InlayTemplate(template(item)).WriteTo(writer, encoder);
         });
     }
 
@@ -86,7 +86,7 @@ public static class Html
             int index = 0;
             foreach (var item in items)
             {
-                new HtmlTemplate(template(item, index)).WriteTo(writer, encoder);
+                new InlayTemplate(template(item, index)).WriteTo(writer, encoder);
                 index++;
             }
         });
@@ -103,13 +103,13 @@ public static class Html
             var list = items as IReadOnlyList<T> ?? items.ToList();
             if (list.Count == 0)
             {
-                new HtmlTemplate(empty).WriteTo(writer, encoder);
+                new InlayTemplate(empty).WriteTo(writer, encoder);
                 return;
             }
             int index = 0;
             foreach (var item in list)
             {
-                new HtmlTemplate(template(item, index)).WriteTo(writer, encoder);
+                new InlayTemplate(template(item, index)).WriteTo(writer, encoder);
                 index++;
             }
         });

@@ -1,29 +1,29 @@
-using AspNetTemplates;
+using InlayHtmlTemplate;
 using Xunit;
 
-namespace AspNetTemplates.Tests;
+namespace InlayHtmlTemplate.Tests;
 
 public class HtmlHelpersTests
 {
-    // --- Html.Raw ---
+    // --- Inlay.Raw ---
 
     [Fact]
     public void Raw_BypassesEscaping()
     {
-        var trusted = Html.Raw("<strong>bold</strong>");
-        var result = Html.Template($"<div>{trusted}</div>").ToString();
+        var trusted = Inlay.Raw("<strong>bold</strong>");
+        var result = Inlay.Template($"<div>{trusted}</div>").ToString();
 
         Assert.Equal("<div><strong>bold</strong></div>", result);
     }
 
-    // --- Html.If ---
+    // --- Inlay.If ---
 
     [Fact]
     public void If_True_RendersContent()
     {
         var name = "Admin";
-        var badge = Html.If(true, $"""<span class="badge">{name}</span>""");
-        var result = Html.Template($"<div>{badge}</div>").ToString();
+        var badge = Inlay.If(true, $"""<span class="badge">{name}</span>""");
+        var result = Inlay.Template($"<div>{badge}</div>").ToString();
 
         Assert.Contains("<span", result);
         Assert.Contains("Admin", result);
@@ -32,8 +32,8 @@ public class HtmlHelpersTests
     [Fact]
     public void If_False_RendersEmpty()
     {
-        var badge = Html.If(false, $"<span>Admin</span>");
-        var result = Html.Template($"<div>{badge}</div>").ToString();
+        var badge = Inlay.If(false, $"<span>Admin</span>");
+        var result = Inlay.Template($"<div>{badge}</div>").ToString();
 
         Assert.Equal("<div></div>", result);
     }
@@ -41,10 +41,10 @@ public class HtmlHelpersTests
     [Fact]
     public void If_WithFallback_RendersFallbackWhenFalse()
     {
-        var content = Html.If(false,
+        var content = Inlay.If(false,
             $"<span>Logged in</span>",
             $"""<a href="/login">Log in</a>""");
-        var result = Html.Template($"<nav>{content}</nav>").ToString();
+        var result = Inlay.Template($"<nav>{content}</nav>").ToString();
 
         Assert.Contains("Log in", result);
         Assert.DoesNotContain("Logged in", result);
@@ -54,18 +54,18 @@ public class HtmlHelpersTests
     public void If_EscapesInterpolatedValues()
     {
         var userInput = "<script>xss</script>";
-        var content = Html.If(true, $"<p>{userInput}</p>");
-        var result = Html.Template($"<div>{content}</div>").ToString();
+        var content = Inlay.If(true, $"<p>{userInput}</p>");
+        var result = Inlay.Template($"<div>{content}</div>").ToString();
 
         Assert.DoesNotContain("<script>", result);
     }
 
-    // --- Html.Css ---
+    // --- Inlay.Css ---
 
     [Fact]
     public void Css_ActiveClassesOnly()
     {
-        var classes = Html.Css(
+        var classes = Inlay.Css(
             ("btn", true),
             ("btn-primary", true),
             ("btn-lg", false));
@@ -76,7 +76,7 @@ public class HtmlHelpersTests
     [Fact]
     public void Css_NoneActive_ReturnsEmpty()
     {
-        var classes = Html.Css(
+        var classes = Inlay.Css(
             ("hidden", false),
             ("disabled", false));
 
@@ -88,21 +88,21 @@ public class HtmlHelpersTests
     {
         var isActive = true;
         var isDisabled = false;
-        var classes = Html.Css(("tab", true), ("active", isActive), ("disabled", isDisabled));
-        var result = Html.Template($"""<div class="{classes}">content</div>""").ToString();
+        var classes = Inlay.Css(("tab", true), ("active", isActive), ("disabled", isDisabled));
+        var result = Inlay.Template($"""<div class="{classes}">content</div>""").ToString();
 
         Assert.Contains("tab active", result);
         Assert.DoesNotContain("disabled", result);
     }
 
-    // --- Html.Each ---
+    // --- Inlay.Each ---
 
     [Fact]
     public void Each_RendersAllItems()
     {
         var items = new[] { "One", "Two", "Three" };
-        var list = Html.Each(items, item => $"<li>{item}</li>");
-        var result = Html.Template($"<ul>{list}</ul>").ToString();
+        var list = Inlay.Each(items, item => $"<li>{item}</li>");
+        var result = Inlay.Template($"<ul>{list}</ul>").ToString();
 
         Assert.Contains("<li>One</li>", result);
         Assert.Contains("<li>Two</li>", result);
@@ -113,8 +113,8 @@ public class HtmlHelpersTests
     public void Each_EscapesEachItem()
     {
         var items = new[] { "Safe", "<script>xss</script>" };
-        var list = Html.Each(items, item => $"<li>{item}</li>");
-        var result = Html.Template($"<ul>{list}</ul>").ToString();
+        var list = Inlay.Each(items, item => $"<li>{item}</li>");
+        var result = Inlay.Template($"<ul>{list}</ul>").ToString();
 
         Assert.Contains("<li>Safe</li>", result);
         Assert.DoesNotContain("<script>", result);
@@ -124,8 +124,8 @@ public class HtmlHelpersTests
     public void Each_EmptyList_RendersNothing()
     {
         var items = Array.Empty<string>();
-        var list = Html.Each(items, item => $"<li>{item}</li>");
-        var result = Html.Template($"<ul>{list}</ul>").ToString();
+        var list = Inlay.Each(items, item => $"<li>{item}</li>");
+        var result = Inlay.Template($"<ul>{list}</ul>").ToString();
 
         Assert.Equal("<ul></ul>", result);
     }
@@ -134,10 +134,10 @@ public class HtmlHelpersTests
     public void Each_WithFallback_ShowsFallbackWhenEmpty()
     {
         var items = Array.Empty<string>();
-        var list = Html.Each(items,
+        var list = Inlay.Each(items,
             item => $"<li>{item}</li>",
             $"""<li class="empty">No items found.</li>""");
-        var result = Html.Template($"<ul>{list}</ul>").ToString();
+        var result = Inlay.Template($"<ul>{list}</ul>").ToString();
 
         Assert.Contains("No items found.", result);
     }
@@ -146,10 +146,10 @@ public class HtmlHelpersTests
     public void Each_WithFallback_IgnoresFallbackWhenNotEmpty()
     {
         var items = new[] { "One" };
-        var list = Html.Each(items,
+        var list = Inlay.Each(items,
             item => $"<li>{item}</li>",
             $"<li>No items</li>");
-        var result = Html.Template($"<ul>{list}</ul>").ToString();
+        var result = Inlay.Template($"<ul>{list}</ul>").ToString();
 
         Assert.Contains("<li>One</li>", result);
         Assert.DoesNotContain("No items", result);
@@ -159,8 +159,8 @@ public class HtmlHelpersTests
     public void Each_WithIndex()
     {
         var items = new[] { "A", "B" };
-        var list = Html.Each(items, (item, i) => $"""<li data-index="{i}">{item}</li>""");
-        var result = Html.Template($"<ul>{list}</ul>").ToString();
+        var list = Inlay.Each(items, (item, i) => $"""<li data-index="{i}">{item}</li>""");
+        var result = Inlay.Template($"<ul>{list}</ul>").ToString();
 
         Assert.Contains("""data-index="0""", result);
         Assert.Contains("""data-index="1""", result);
@@ -174,10 +174,10 @@ public class HtmlHelpersTests
         var isAdmin = true;
         var users = new[] { "Alice", "Bob" };
 
-        var badge = Html.If(isAdmin, $"""<span class="badge">Admin</span>""");
-        var list = Html.Each(users, u => $"<li>{u}</li>");
+        var badge = Inlay.If(isAdmin, $"""<span class="badge">Admin</span>""");
+        var list = Inlay.Each(users, u => $"<li>{u}</li>");
 
-        var result = Html.Template($"<div>{badge}<ul>{list}</ul></div>").ToString();
+        var result = Inlay.Template($"<div>{badge}<ul>{list}</ul></div>").ToString();
 
         Assert.Contains("<span", result);
         Assert.Contains("Alice", result);
@@ -188,8 +188,8 @@ public class HtmlHelpersTests
     public void Composition_TemplateInsideTemplate()
     {
         var name = "Alice";
-        var header = Html.Template($"<h1>{name}</h1>");
-        var page = Html.Template($"<div>{header}</div>").ToString();
+        var header = Inlay.Template($"<h1>{name}</h1>");
+        var page = Inlay.Template($"<div>{header}</div>").ToString();
 
         Assert.Equal("<div><h1>Alice</h1></div>", page);
     }

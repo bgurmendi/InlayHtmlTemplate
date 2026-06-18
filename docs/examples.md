@@ -1,17 +1,17 @@
 # Examples
 
-Common patterns for using `Html.Template`. For composition, conditionals, class toggling, and list iteration, see [Advanced Examples](advanced-examples.md).
+Common patterns for using `Inlay.Template`. For composition, conditionals, class toggling, and list iteration, see [Advanced Examples](advanced-examples.md).
 
 ## Building a Page Layout
 
 ```csharp
-using AspNetTemplates;
+using InlayHtmlTemplate;
 
 public static class PageLayout
 {
-    public static HtmlTemplate Render(string title, IHtmlContent bodyContent)
+    public static InlayTemplate Render(string title, IHtmlContent bodyContent)
     {
-        return Html.Template($"""
+        return Inlay.Template($"""
             <!DOCTYPE html>
             <html>
             <head>
@@ -26,7 +26,7 @@ public static class PageLayout
 }
 
 // Usage:
-var body = Html.Template($"<h1>Welcome, {userName}!</h1>");
+var body = Inlay.Template($"<h1>Welcome, {userName}!</h1>");
 var page = PageLayout.Render("Home", body);
 ```
 
@@ -38,7 +38,7 @@ var bio = user.Bio;          // "I love C# & .NET"
 var avatar = user.AvatarUrl; // "https://example.com/alice.jpg"
 var website = user.Website;  // "https://alice.dev"
 
-var html = Html.Template($"""
+var html = Inlay.Template($"""
     <div class="profile-card">
         <img src="{avatar}" alt="{name}" />
         <h2>{name}</h2>
@@ -57,16 +57,16 @@ Each value is escaped according to its position:
 
 ## Composing Templates
 
-Since `Html.Template` returns `HtmlTemplate`, the result of one template embeds directly in another — no wrapping needed:
+Since `Inlay.Template` returns `InlayTemplate`, the result of one template embeds directly in another — no wrapping needed:
 
 ```csharp
-HtmlTemplate RenderListItem(string text) =>
-    Html.Template($"<li>{text}</li>");
+InlayTemplate RenderListItem(string text) =>
+    Inlay.Template($"<li>{text}</li>");
 
-HtmlTemplate RenderList(IEnumerable<string> items)
+InlayTemplate RenderList(IEnumerable<string> items)
 {
-    var listItems = Html.Each(items, item => $"<li>{item}</li>");
-    return Html.Template($"<ul>{listItems}</ul>");
+    var listItems = Inlay.Each(items, item => $"<li>{item}</li>");
+    return Inlay.Template($"<ul>{listItems}</ul>");
 }
 
 var html = RenderList(new[] { "First", "<script>xss</script>", "Third" });
@@ -76,14 +76,14 @@ var html = RenderList(new[] { "First", "<script>xss</script>", "Third" });
 ## Dynamic Table from Data
 
 ```csharp
-HtmlTemplate RenderTable(IEnumerable<User> users) =>
-    Html.Template($"""
+InlayTemplate RenderTable(IEnumerable<User> users) =>
+    Inlay.Template($"""
         <table>
             <thead>
                 <tr><th>Name</th><th>Email</th><th>Role</th></tr>
             </thead>
             <tbody>
-                {Html.Each(users, u => $"""
+                {Inlay.Each(users, u => $"""
                     <tr>
                         <td>{u.Name}</td>
                         <td><a href="mailto:{u.Email}">{u.Email}</a></td>
@@ -98,8 +98,8 @@ HtmlTemplate RenderTable(IEnumerable<User> users) =>
 ## Form with CSRF Protection
 
 ```csharp
-HtmlTemplate RenderForm(string action, string csrfToken) =>
-    Html.Template($"""
+InlayTemplate RenderForm(string action, string csrfToken) =>
+    Inlay.Template($"""
         <form method="post" action="{action}">
             <input type="hidden" name="__RequestVerificationToken" value="{csrfToken}" />
             <label for="name">Name:</label>
@@ -119,7 +119,7 @@ app.Use(async (context, next) =>
     if (context.Response.StatusCode == 404)
     {
         var path = context.Request.Path.ToString();
-        var html = Html.Template($"""
+        var html = Inlay.Template($"""
             <h1>Page Not Found</h1>
             <p>The page <code>{path}</code> does not exist.</p>
             <a href="/">Go home</a>

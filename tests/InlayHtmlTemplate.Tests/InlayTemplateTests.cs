@@ -1,19 +1,19 @@
 using System.Text.Encodings.Web;
-using AspNetTemplates;
+using InlayHtmlTemplate;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Routing;
 using Xunit;
 
-namespace AspNetTemplates.Tests;
+namespace InlayHtmlTemplate.Tests;
 
 public class HtmlTemplateTests
 {
     [Fact]
     public void Template_ImplementsIActionResult()
     {
-        var template = Html.Template($"<p>test</p>");
+        var template = Inlay.Template($"<p>test</p>");
 
         Assert.IsAssignableFrom<IActionResult>(template);
     }
@@ -21,7 +21,7 @@ public class HtmlTemplateTests
     [Fact]
     public void Template_ImplementsIResult()
     {
-        var template = Html.Template($"<p>test</p>");
+        var template = Inlay.Template($"<p>test</p>");
 
         Assert.IsAssignableFrom<IResult>(template);
     }
@@ -30,7 +30,7 @@ public class HtmlTemplateTests
     public void Template_WriteTo_ProducesCorrectOutput()
     {
         var name = "Alice";
-        var template = Html.Template($"<h1>{name}</h1>");
+        var template = Inlay.Template($"<h1>{name}</h1>");
 
         using var writer = new StringWriter();
         template.WriteTo(writer, HtmlEncoder.Default);
@@ -42,7 +42,7 @@ public class HtmlTemplateTests
     public void Template_ToString_MatchesWriteTo()
     {
         var name = "Bob";
-        var template = Html.Template($"<p>{name}</p>");
+        var template = Inlay.Template($"<p>{name}</p>");
 
         using var writer = new StringWriter();
         template.WriteTo(writer, HtmlEncoder.Default);
@@ -53,8 +53,8 @@ public class HtmlTemplateTests
     [Fact]
     public void Template_NestedTemplates_ComposeWithoutIntermediateStrings()
     {
-        var inner = Html.Template($"<span>inner</span>");
-        var outer = Html.Template($"<div>{inner}</div>");
+        var inner = Inlay.Template($"<span>inner</span>");
+        var outer = Inlay.Template($"<div>{inner}</div>");
 
         Assert.Equal("<div><span>inner</span></div>", outer.ToString());
     }
@@ -62,9 +62,9 @@ public class HtmlTemplateTests
     [Fact]
     public void Template_DeeplyNested_ComposesCorrectly()
     {
-        var a = Html.Template($"<em>deep</em>");
-        var b = Html.Template($"<span>{a}</span>");
-        var c = Html.Template($"<div>{b}</div>");
+        var a = Inlay.Template($"<em>deep</em>");
+        var b = Inlay.Template($"<span>{a}</span>");
+        var c = Inlay.Template($"<div>{b}</div>");
 
         Assert.Equal("<div><span><em>deep</em></span></div>", c.ToString());
     }
@@ -72,7 +72,7 @@ public class HtmlTemplateTests
     [Fact]
     public async Task ExecuteResultAsync_SetsContentTypeAndWritesBody()
     {
-        var template = Html.Template($"<h1>Hello</h1>");
+        var template = Inlay.Template($"<h1>Hello</h1>");
 
         var httpContext = new DefaultHttpContext();
         httpContext.Response.Body = new MemoryStream();
@@ -92,7 +92,7 @@ public class HtmlTemplateTests
     public async Task ExecuteAsync_SetsContentTypeAndWritesBody()
     {
         var name = "World";
-        var template = Html.Template($"<p>{name}</p>");
+        var template = Inlay.Template($"<p>{name}</p>");
 
         var httpContext = new DefaultHttpContext();
         httpContext.Response.Body = new MemoryStream();
@@ -119,7 +119,7 @@ public class HtmlTemplateTests
             yield return "b";
         }
 
-        var result = Html.Each(LazyItems(), item => $"<li>{item}</li>");
+        var result = Inlay.Each(LazyItems(), item => $"<li>{item}</li>");
 
         Assert.Equal(0, iterationCount);
 

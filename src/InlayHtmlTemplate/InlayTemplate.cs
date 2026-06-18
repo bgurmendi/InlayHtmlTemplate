@@ -3,17 +3,17 @@ using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AspNetTemplates;
+namespace InlayHtmlTemplate;
 
 /// <summary>
 /// A deferred HTML template that renders on demand. Can be returned directly from controllers.
 /// </summary>
-public sealed class HtmlTemplate : IHtmlContent, IActionResult, IResult
+public sealed class InlayTemplate : IHtmlContent, IActionResult, IResult
 {
     private readonly FormattableString _formattable;
 
-    /// <inheritdoc cref="HtmlTemplate"/>
-    public HtmlTemplate(FormattableString formattable)
+    /// <inheritdoc cref="InlayTemplate"/>
+    public InlayTemplate(FormattableString formattable)
         => _formattable = formattable;
 
     /// <summary>

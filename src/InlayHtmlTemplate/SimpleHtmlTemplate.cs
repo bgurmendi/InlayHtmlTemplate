@@ -1,7 +1,7 @@
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Html;
 
-namespace AspNetTemplates;
+namespace InlayHtmlTemplate;
 
 /// <summary>
 /// Renders HTML templates using C# string interpolation with automatic context-aware escaping.

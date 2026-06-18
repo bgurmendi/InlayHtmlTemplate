@@ -1,4 +1,4 @@
-using AspNetTemplates;
+using InlayHtmlTemplate;
 using Microsoft.AspNetCore.Html;
 using WebApp.Models;
 
@@ -6,24 +6,24 @@ namespace WebApp.Templates;
 
 public static class HomeTemplates
 {
-    public static HtmlTemplate Index(IEnumerable<Feature> features)
+    public static InlayTemplate Index(IEnumerable<Feature> features)
     {
-        return Html.Template($"""
+        return Inlay.Template($"""
             <section class="hero">
-                <h1>AspNetTemplates</h1>
+                <h1>InlayHtmlTemplate</h1>
                 <p>Context-aware HTML templates using C# string interpolation.</p>
-                <p class="subtitle">This page is rendered entirely with <code>Html.Template</code> — no Razor, no .cshtml files.</p>
+                <p class="subtitle">This page is rendered entirely with <code>Inlay.Template</code> — no Razor, no .cshtml files.</p>
             </section>
 
             <section>
                 <h2>Features</h2>
                 <div class="feature-grid">
-                    {Html.Each(features,
+                    {Inlay.Each(features,
                         f => $"""
-                            <div class="{Html.Css(("feature", true), ("highlight", f.IsNew))}">
+                            <div class="{Inlay.Css(("feature", true), ("highlight", f.IsNew))}">
                                 <h3>{f.Title}</h3>
                                 <p>{f.Description}</p>
-                                {Html.If(f.IsNew, $"""<span class="badge">New</span>""")}
+                                {Inlay.If(f.IsNew, $"""<span class="badge">New</span>""")}
                             </div>
                             """,
                         $"<p>No features to display.</p>")}
@@ -38,13 +38,13 @@ public static class HomeTemplates
             """);
     }
 
-    static HtmlTemplate EscapingDemo()
+    static InlayTemplate EscapingDemo()
     {
         var userInput = """<img src="x" onerror="alert('xss')">""";
         var maliciousClass = """foo" onclick="alert(1)""";
         var maliciousUrl = "javascript:alert(1)";
 
-        return Html.Template($"""
+        return Inlay.Template($"""
             <table class="demo-table">
                 <thead>
                     <tr>
@@ -74,10 +74,10 @@ public static class HomeTemplates
             """);
     }
 
-    public static HtmlTemplate Privacy() =>
-        Html.Template($"""
+    public static InlayTemplate Privacy() =>
+        Inlay.Template($"""
             <h1>Privacy Policy</h1>
-            <p>This is a demo application for the AspNetTemplates library.</p>
+            <p>This is a demo application for the InlayHtmlTemplate library.</p>
             <p>No data is collected or stored.</p>
             """);
 }
