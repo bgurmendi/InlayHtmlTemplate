@@ -20,40 +20,8 @@ public class SimpleHtmlTemplate
 
     internal static void RenderTo(FormattableString formattable, TextWriter writer, HtmlEncoder encoder)
     {
-        var format = formattable.Format;
-        var args = formattable.GetArguments();
-        var contextAnalyzer = new HtmlContextAnalyzer();
-
-        int argIndex = 0;
-        for (int i = 0; i < format.Length; i++)
-        {
-            contextAnalyzer.ProcessChar(format[i]);
-
-            if (i < format.Length - 1 && format[i] == '{' && format[i + 1] != '{')
-            {
-                int end = format.IndexOf('}', i);
-                if (end == -1) break;
-
-                var context = contextAnalyzer.CurrentContext;
-
-                if (argIndex < args.Length)
-                {
-                    WriteWithContext(args[argIndex], writer, encoder, context);
-                    argIndex++;
-                }
-
-                for (int j = i; j <= end && j < format.Length; j++)
-                {
-                    contextAnalyzer.ProcessChar(format[j]);
-                }
-
-                i = end;
-            }
-            else
-            {
-                writer.Write(format[i]);
-            }
-        }
+        var plan = TemplatePlan.Analyze(formattable.Format);
+        plan.RenderTo(formattable.GetArguments(), writer, encoder);
     }
 
     internal static void WriteWithContext(object? arg, TextWriter writer,
