@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>InlayHtmlTemplate.DaisyUI</RootNamespace>
+
+    <!-- NuGet Package Metadata -->
+    <PackageId>InlayHtmlTemplate.DaisyUI</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>InlayHtmlTemplate Contributors</Authors>
+    <Description>Reusable DaisyUI component templates for InlayHtmlTemplate. Provides type-safe, composable HTML components (alerts, cards, modals, navbars, etc.) and page layouts using DaisyUI + Tailwind CSS.</Description>
+    <PackageTags>inlay;html;template;daisyui;tailwind;components;aspnet</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>CS1591</NoWarn>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../InlayHtmlTemplate/InlayHtmlTemplate.csproj" />
+  </ItemGroup>
+
+</Project>
