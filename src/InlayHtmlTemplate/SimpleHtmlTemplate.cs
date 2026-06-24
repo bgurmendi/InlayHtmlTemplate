@@ -67,6 +67,8 @@ public enum HtmlContext
     Attribute,
     /// <summary>Inside a URL attribute (href, src).</summary>
     UrlAttribute,
+    /// <summary>Inside a boolean attribute (disabled, checked, selected, etc.). The entire attribute is rendered or omitted based on the argument's truthiness.</summary>
+    BooleanAttribute,
     /// <summary>Inside a script tag (reserved).</summary>
     Script
 }
@@ -76,6 +78,15 @@ public enum HtmlContext
 /// </summary>
 public class HtmlContextAnalyzer
 {
+    private static readonly HashSet<string> BooleanAttributes =
+    [
+        "allowfullscreen", "async", "autofocus", "autoplay", "checked",
+        "controls", "default", "defer", "disabled", "formnovalidate",
+        "hidden", "inert", "ismap", "itemscope", "loop", "multiple",
+        "muted", "nomodule", "novalidate", "open", "playsinline",
+        "readonly", "required", "reversed", "selected"
+    ];
+
     private HtmlContext _currentContext = HtmlContext.Content;
     private bool _inTag = false;
     private bool _inAttribute = false;
@@ -84,6 +95,12 @@ public class HtmlContextAnalyzer
 
     /// <summary>The current HTML context based on characters processed so far.</summary>
     public HtmlContext CurrentContext => _currentContext;
+
+    /// <summary>The name of the current attribute being parsed.</summary>
+    public string CurrentAttribute => _currentAttribute;
+
+    /// <summary>Whether the current attribute value is inside quotes.</summary>
+    public bool IsQuotedValue => _quoteChar != '\0';
 
     /// <summary>Feeds a character to the analyzer, updating the internal state.</summary>
     public void ProcessChar(char c)
@@ -113,8 +130,12 @@ public class HtmlContextAnalyzer
                 }
                 else if (char.IsWhiteSpace(c))
                 {
-                    if (!_inAttribute)
-                        _currentAttribute = "";
+                    if (_inAttribute)
+                    {
+                        _inAttribute = false;
+                        _currentContext = HtmlContext.Content;
+                    }
+                    _currentAttribute = "";
                 }
                 else if (char.IsLetter(c) && !_inAttribute)
                 {
@@ -123,6 +144,7 @@ public class HtmlContextAnalyzer
                 else if (c == '=')
                 {
                     _inAttribute = true;
+                    _currentContext = GetAttributeContext(_currentAttribute);
                 }
             }
             else
@@ -141,6 +163,9 @@ public class HtmlContextAnalyzer
     private HtmlContext GetAttributeContext(string attribute)
     {
         attribute = attribute.ToLowerInvariant();
+
+        if (BooleanAttributes.Contains(attribute))
+            return HtmlContext.BooleanAttribute;
 
         if (attribute == "href" || attribute == "src")
             return HtmlContext.UrlAttribute;
