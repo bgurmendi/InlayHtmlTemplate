@@ -95,19 +95,34 @@ InlayTemplate RenderTable(IEnumerable<User> users) =>
         """);
 ```
 
-## Form with CSRF Protection
+## Form with Boolean Attributes
+
+Boolean HTML attributes like `disabled`, `checked`, `selected`, and `required` are handled automatically. Write `disabled={condition}` and the engine renders the attribute when truthy, omits it when falsy:
 
 ```csharp
-InlayTemplate RenderForm(string action, string csrfToken) =>
+InlayTemplate RenderForm(string action, string csrfToken, bool isSubmitting) =>
     Inlay.Template($"""
         <form method="post" action="{action}">
             <input type="hidden" name="__RequestVerificationToken" value="{csrfToken}" />
             <label for="name">Name:</label>
-            <input type="text" id="name" name="name" />
-            <button type="submit">Submit</button>
+            <input type="text" id="name" name="name" required={true} />
+            <label>
+                <input type="checkbox" name="terms" checked={false} />
+                I accept the terms
+            </label>
+            <button type="submit" disabled={isSubmitting}>Submit</button>
         </form>
         """);
+
+// When isSubmitting is false:
+//   <button type="submit">Submit</button>
+// When isSubmitting is true:
+//   <button type="submit" disabled>Submit</button>
 ```
+
+The quoted form `disabled="{isSubmitting}"` also works, but the unquoted form is recommended — it makes it clearer that the value controls the attribute's presence, not its content.
+
+This works with any of the 25 standard boolean attributes (`disabled`, `checked`, `selected`, `required`, `readonly`, `hidden`, `open`, `autofocus`, `multiple`, etc.). Non-boolean attributes like `name`, `class`, and `type` continue to render their values normally.
 
 ## Integration with ASP.NET Core Middleware
 

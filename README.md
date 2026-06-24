@@ -64,7 +64,7 @@ var page = Inlay.Template($"<div>{header}<p>{body}</p></div>");
 
 ## Context-Aware Escaping
 
-The engine detects three HTML contexts and escapes accordingly:
+The engine detects four HTML contexts and handles each accordingly:
 
 ### Element Content
 ```csharp
@@ -86,6 +86,19 @@ var url = "javascript:alert(1)";
 Inlay.Template($"""<a href="{url}">click</a>""");
 // javascript: URLs are blocked and replaced with #
 ```
+
+### Boolean Attributes (disabled, checked, selected, ...)
+```csharp
+var isDisabled = true;
+Inlay.Template($"""<input type="text" disabled={isDisabled} />""");
+// Output: <input type="text" disabled />
+
+var isChecked = false;
+Inlay.Template($"""<input type="checkbox" checked={isChecked} />""");
+// Output: <input type="checkbox" />
+```
+
+The engine recognizes [25 standard HTML boolean attributes](docs/api-reference.md#boolean-attribute-context) and renders them correctly: the attribute appears when the value is truthy, and is omitted entirely when falsy. No manual `Inlay.If` needed — just write `disabled={condition}` and the engine handles it. The quoted form `disabled="{condition}"` also works, but the unquoted form is recommended for clarity.
 
 ## Template Helpers
 

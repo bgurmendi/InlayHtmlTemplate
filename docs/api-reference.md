@@ -103,12 +103,13 @@ Low-level rendering engine. Returns `string` instead of `InlayTemplate`. Prefer 
 
 Represents the HTML context where an interpolated value appears.
 
-| Value          | Description                                      | Escaping Strategy               |
-|----------------|--------------------------------------------------|---------------------------------|
-| `Content`      | Inside element content (`<p>{value}</p>`)        | `HtmlEncode`                    |
-| `Attribute`    | Inside an attribute (`class="{value}"`)          | `HtmlEncode` + quote escaping   |
-| `UrlAttribute` | Inside `href` or `src` (`href="{value}"`)        | `UrlEncode` + `javascript:` block |
-| `Script`       | Inside a `<script>` tag (reserved for future use)| `HtmlEncode` (default)          |
+| Value              | Description                                          | Behavior                          |
+|--------------------|------------------------------------------------------|-----------------------------------|
+| `Content`          | Inside element content (`<p>{value}</p>`)            | `HtmlEncode`                      |
+| `Attribute`        | Inside an attribute (`class="{value}"`)              | `HtmlEncode` + quote escaping     |
+| `UrlAttribute`     | Inside `href` or `src` (`href="{value}"`)            | `UrlEncode` + `javascript:` block |
+| `BooleanAttribute` | Inside a boolean attribute (`disabled="{value}"`)    | Attribute rendered or omitted     |
+| `Script`           | Inside a `<script>` tag (reserved for future use)    | `HtmlEncode` (default)            |
 
 ## HtmlContextAnalyzer
 
@@ -117,6 +118,7 @@ A character-by-character HTML parser that tracks the current context.
 ### Properties
 
 - `CurrentContext` (`HtmlContext`) — The current HTML context based on characters processed so far.
+- `CurrentAttribute` (`string`) — The name of the attribute currently being parsed (empty when outside an attribute).
 
 ### Methods
 
@@ -138,6 +140,39 @@ This prevents attribute breakout attacks where a value like `foo" onclick="alert
 
 ### URL Attribute Context
 URL encoding via `UrlEncoder.Default`, with an additional check: values starting with `javascript:` (case-insensitive) are replaced with `#` to prevent script injection through URL attributes.
+
+### Boolean Attribute Context
+
+When an interpolated value appears inside a recognized boolean attribute (`disabled={value}` or `disabled="{value}"`), the engine renders the attribute based on the value's truthiness instead of encoding the value as text:
+
+- `bool true` → renders ` disabled` (attribute present, no value)
+- `bool false` → renders nothing (attribute omitted entirely)
+- Non-empty string (except `"false"`) → renders the attribute
+- Empty string, `null`, or string `"false"` → omits the attribute
+
+The engine removes the attribute name (and surrounding quotes if present) from the literal segments during analysis, so no stale `=""` fragments are left behind.
+
+Both forms are supported — the unquoted form is recommended for clarity since the value is never rendered as text:
+
+```csharp
+// Recommended: unquoted — clearer that the value controls presence, not content
+Inlay.Template($"""<input type="text" disabled={isDisabled} />""");
+
+// Also valid: quoted — works identically
+Inlay.Template($"""<input type="text" disabled="{isDisabled}" />""");
+```
+
+**Recognized boolean attributes (25):**
+
+`allowfullscreen`, `async`, `autofocus`, `autoplay`, `checked`, `controls`, `default`, `defer`, `disabled`, `formnovalidate`, `hidden`, `inert`, `ismap`, `itemscope`, `loop`, `multiple`, `muted`, `nomodule`, `novalidate`, `open`, `playsinline`, `readonly`, `required`, `reversed`, `selected`
+
+```csharp
+// Multiple boolean attributes work independently
+Inlay.Template($"""<input type="checkbox" checked={isChecked} disabled={isDisabled} />""");
+
+// Non-boolean attributes like name, class, type are unaffected
+Inlay.Template($"""<input type="text" name="{name}" disabled={isDisabled} class="{css}" />""");
+```
 
 ### IHtmlContent Bypass
 Objects implementing `Microsoft.AspNetCore.Html.IHtmlContent` are inserted without escaping by calling `WriteTo` on the same `TextWriter`. This is how template composition works — `InlayTemplate` implements `IHtmlContent`, so nested templates render recursively without intermediate strings:

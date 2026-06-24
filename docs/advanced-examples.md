@@ -112,6 +112,52 @@ var header = Inlay.If(isLoggedIn,
 ```
 
 
+## Boolean attributes
+
+HTML boolean attributes (`disabled`, `checked`, `selected`, `required`, `readonly`, `hidden`, `open`, etc.) work naturally in templates — the engine detects them and renders the attribute only when the value is truthy:
+
+```csharp
+InlayTemplate RenderToggle(string name, string label, bool isChecked, bool isDisabled = false) =>
+    Inlay.Template($"""
+        <label>
+            <input type="checkbox" name="{name}" checked={isChecked} disabled={isDisabled} />
+            {label}
+        </label>
+        """);
+
+var html = RenderToggle("notifications", "Email notifications", isChecked: true);
+// <label><input type="checkbox" name="notifications" checked /> Email notifications</label>
+
+var html2 = RenderToggle("sms", "SMS alerts", isChecked: false, isDisabled: true);
+// <label><input type="checkbox" name="sms" disabled /> SMS alerts</label>
+```
+
+Both `disabled={value}` and `disabled="{value}"` are supported. The unquoted form is recommended for clarity — it makes it obvious that the value controls the attribute's presence, not its content.
+
+This is especially useful in reusable components — you can forward boolean parameters directly into the template without wrapping them in `Inlay.If`:
+
+```csharp
+InlayTemplate RenderSelect(string name, IEnumerable<(string Value, string Label, bool Selected)> options) =>
+    Inlay.Template($"""
+        <select name="{name}">
+            {Inlay.Each(options, o =>
+                $"""<option value="{o.Value}" selected={o.Selected}>{o.Label}</option>""")}
+        </select>
+        """);
+```
+
+### Truthiness rules
+
+| Value | Renders attribute? |
+|---|---|
+| `bool true` | Yes |
+| `bool false` | No |
+| Non-empty string (except `"false"`) | Yes |
+| Empty string `""` | No |
+| `null` | No |
+| Any other non-null object | Yes |
+
+
 ## Class toggling with `Inlay.Css`
 
 `Inlay.Css` builds a class string from a list of `(className, active)` tuples. Only classes where `active` is `true` are included.
