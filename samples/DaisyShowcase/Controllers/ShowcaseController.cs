@@ -20,4 +20,6 @@ public class ShowcaseController : Controller
     public IActionResult FormControls() => ShowcaseTemplates.FormControls();
 
     public IActionResult Layouts() => ShowcaseTemplates.Layouts();
+
+    public IActionResult GridLayout() => ShowcaseTemplates.GridLayout();
 }

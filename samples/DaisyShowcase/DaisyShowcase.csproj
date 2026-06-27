@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/InlayHtmlTemplate.DaisyUI/InlayHtmlTemplate.DaisyUI.csproj" />
+    <ProjectReference Include="../../src/InlayHtmlTemplate.Components/InlayHtmlTemplate.Components.csproj" />
   </ItemGroup>
 
 </Project>

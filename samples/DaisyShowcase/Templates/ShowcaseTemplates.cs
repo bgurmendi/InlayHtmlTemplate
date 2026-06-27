@@ -1,4 +1,5 @@
 using InlayHtmlTemplate;
+using InlayHtmlTemplate.Components;
 using InlayHtmlTemplate.DaisyUI;
 using Microsoft.AspNetCore.Html;
 
@@ -513,6 +514,226 @@ public static class ShowcaseTemplates
         return WithSidebar("Layouts", "Layouts", body);
     }
 
+    // ── Grid Layout ─────────────────────────────────────────
+
+    public static InlayTemplate GridLayout()
+    {
+        var body = Inlay.Template($"""
+            <h1 class="text-4xl font-bold mb-8">Grid Layout</h1>
+            <p class="mb-4 text-lg opacity-70">
+                The <code>Grid</code> component from <code>InlayHtmlTemplate.Components</code> provides a responsive 12-column layout system.
+                It generates its own CSS — no Tailwind scanner dependency.
+            </p>
+
+            {Demo("Mobile-first design",
+                """
+                // span is the base (mobile) size — defaults to 12 (full width).
+                // spanSm/spanMd/spanLg override at larger screens.
+                // Only specify what changes — omit the rest.
+
+                .Add(content, spanMd: 6)          // mobile: 12, tablet+: 6
+                .Add(content, spanMd: 4, spanLg: 3) // mobile: 12, tablet: 4, desktop: 3
+                .Add(content, span: 6)            // always 6 at any screen size
+                """,
+                Inlay.Template($"""
+                    <div class="overflow-x-auto">
+                        <table class="table table-zebra">
+                            <thead><tr>
+                                <th>Parameter</th>
+                                <th>Breakpoint</th>
+                                <th>Screen width</th>
+                                <th>Default</th>
+                            </tr></thead>
+                            <tbody>
+                                <tr><td><code>span</code></td><td>Base (mobile)</td><td>0px+</td><td><strong>12</strong> (full width)</td></tr>
+                                <tr><td><code>spanSm</code></td><td>Small</td><td>640px+</td><td>inherits <code>span</code></td></tr>
+                                <tr><td><code>spanMd</code></td><td>Medium (tablet)</td><td>768px+</td><td>inherits previous</td></tr>
+                                <tr><td><code>spanLg</code></td><td>Large (desktop)</td><td>1024px+</td><td>inherits previous</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="mt-4 opacity-70">The design is <strong>mobile-first</strong>: <code>span</code> (default 12) applies from the smallest screen up. Each breakpoint overrides only from that width onwards. On mobile, elements almost always stack vertically at full width, so <code>span: 12</code> is the default and you don't need to write it.</p>
+                    """))}
+
+            {Demo("Basic Grid — Equal Columns",
+                """
+                new Grid(gap: 6)
+                    .Add(card1, spanMd: 4)
+                    .Add(card2, spanMd: 4)
+                    .Add(card3, spanMd: 4)
+                """,
+                new Grid(gap: 6)
+                    .Add(Daisy.Card(
+                        title: "Column 1",
+                        body: Inlay.Template($"<p>Full width on mobile, 4/12 on tablet+</p>"),
+                        bordered: true), spanMd: 4)
+                    .Add(Daisy.Card(
+                        title: "Column 2",
+                        body: Inlay.Template($"<p>All three columns are equal width</p>"),
+                        bordered: true), spanMd: 4)
+                    .Add(Daisy.Card(
+                        title: "Column 3",
+                        body: Inlay.Template($"<p>They stack on mobile screens</p>"),
+                        bordered: true), spanMd: 4))}
+
+            {Demo("Unequal Columns — Sidebar + Content",
+                """
+                new Grid(gap: 6)
+                    .Add(sidebar, spanMd: 3)
+                    .Add(main, spanMd: 9)
+                """,
+                new Grid(gap: 6)
+                    .Add(Inlay.Template($"""
+                        <div class="bg-base-200 p-4 rounded-box h-full">
+                            <h3 class="font-bold mb-2">Sidebar</h3>
+                            <ul class="menu">
+                                <li><a>Dashboard</a></li>
+                                <li><a>Settings</a></li>
+                                <li><a>Profile</a></li>
+                            </ul>
+                        </div>
+                        """), spanMd: 3)
+                    .Add(Inlay.Template($"""
+                        <div class="bg-base-200 p-6 rounded-box">
+                            <h3 class="font-bold text-xl mb-4">Main Content</h3>
+                            <p>This area spans 9 of 12 columns on tablet+. On mobile, both sidebar and content stack vertically at full width.</p>
+                        </div>
+                        """), spanMd: 9))}
+
+            {Demo("Multiple Rows with NewRow()",
+                """
+                new Grid(gap: 4)
+                    .Add(a, spanMd: 6)
+                    .Add(b, spanMd: 6)
+                    .NewRow()
+                    .Add(c, spanMd: 4)
+                    .Add(d, spanMd: 4)
+                    .Add(e, spanMd: 4)
+                    .NewRow()
+                    .Add(f)  // full width — span defaults to 12
+                """,
+                new Grid(gap: 4)
+                    .Add(Daisy.Alert("Row 1 — Left (spanMd: 6)", AlertVariant.Info), spanMd: 6)
+                    .Add(Daisy.Alert("Row 1 — Right (spanMd: 6)", AlertVariant.Success), spanMd: 6)
+                    .NewRow()
+                    .Add(Daisy.Alert("Row 2 — A (spanMd: 4)", AlertVariant.Warning), spanMd: 4)
+                    .Add(Daisy.Alert("Row 2 — B (spanMd: 4)", AlertVariant.Warning), spanMd: 4)
+                    .Add(Daisy.Alert("Row 2 — C (spanMd: 4)", AlertVariant.Warning), spanMd: 4)
+                    .NewRow()
+                    .Add(Daisy.Alert("Row 3 — Full width (default span: 12)", AlertVariant.Error)))}
+
+            {Demo("All Breakpoints in Action",
+                """
+                // Resize the browser to see layout changes:
+                //   Mobile (<640px): 1 per row
+                //   Small  (640px+): 2 per row
+                //   Medium (768px+): 3 per row
+                //   Large  (1024px+): 4 per row
+                new Grid(gap: 4)
+                    .Add(content, spanSm: 6, spanMd: 4, spanLg: 3)
+                """,
+                new Grid(gap: 4)
+                    .Add(Daisy.Badge("Item A", BadgeVariant.Primary), spanSm: 6, spanMd: 4, spanLg: 3)
+                    .Add(Daisy.Badge("Item B", BadgeVariant.Secondary), spanSm: 6, spanMd: 4, spanLg: 3)
+                    .Add(Daisy.Badge("Item C", BadgeVariant.Accent), spanSm: 6, spanMd: 4, spanLg: 3)
+                    .Add(Daisy.Badge("Item D", BadgeVariant.Info), spanSm: 6, spanMd: 4, spanLg: 3))}
+
+            {Demo("Form Layout",
+                """
+                new Grid(gap: 4)
+                    .Add(nameInput, spanMd: 6)
+                    .Add(surnameInput, spanMd: 6)
+                    .NewRow()
+                    .Add(emailInput, spanMd: 8)
+                    .Add(phoneInput, spanMd: 4)
+                    .NewRow()
+                    .Add(addressInput)  // full width
+                    .NewRow()
+                    .Add(zipInput, spanMd: 3)
+                    .Add(cityInput, spanMd: 5)
+                    .Add(countryInput, spanMd: 4)
+                """,
+                new Grid(gap: 4)
+                    .Add(Daisy.FormControl(
+                        Daisy.TextInput(name: "name", placeholder: "Juan"),
+                        label: "Name"), spanMd: 6)
+                    .Add(Daisy.FormControl(
+                        Daisy.TextInput(name: "surname", placeholder: "Garcia"),
+                        label: "Surname"), spanMd: 6)
+                    .NewRow()
+                    .Add(Daisy.FormControl(
+                        Daisy.TextInput(name: "email", type: "email", placeholder: "juan@example.com"),
+                        label: "Email"), spanMd: 8)
+                    .Add(Daisy.FormControl(
+                        Daisy.TextInput(name: "phone", type: "tel", placeholder: "+34 600 123 456"),
+                        label: "Phone"), spanMd: 4)
+                    .NewRow()
+                    .Add(Daisy.FormControl(
+                        Daisy.TextInput(name: "address", placeholder: "Calle Principal 123"),
+                        label: "Address"))
+                    .NewRow()
+                    .Add(Daisy.FormControl(
+                        Daisy.TextInput(name: "zip", placeholder: "28001"),
+                        label: "Zip Code"), spanMd: 3)
+                    .Add(Daisy.FormControl(
+                        Daisy.TextInput(name: "city", placeholder: "Madrid"),
+                        label: "City"), spanMd: 5)
+                    .Add(Daisy.FormControl(
+                        Daisy.Select([
+                            new SelectOption("es", "Spain"),
+                            new SelectOption("fr", "France"),
+                            new SelectOption("de", "Germany"),
+                            new SelectOption("it", "Italy"),
+                        ], name: "country", placeholder: "Select country"),
+                        label: "Country"), spanMd: 4)
+                    .NewRow()
+                    .Add(Inlay.Template($"""
+                        <div class="flex gap-2 justify-end">
+                            {Daisy.Button("Cancel", ButtonVariant.Ghost)}
+                            {Daisy.Button("Submit", ButtonVariant.Primary)}
+                        </div>
+                        """)))}
+
+            {Demo("Dynamic Grid with Data",
+                """
+                var grid = new Grid(gap: 4);
+                foreach (var item in items)
+                    grid.Add(Daisy.Card(...), spanSm: 6, spanMd: 4);
+                """,
+                DynamicGridDemo())}
+            """);
+
+        return WithSidebar("Grid Layout", "GridLayout", body);
+    }
+
+    static IHtmlContent DynamicGridDemo()
+    {
+        var products = new[]
+        {
+            (Name: "Laptop Pro", Price: "$1,299", Tag: "Electronics"),
+            (Name: "Wireless Mouse", Price: "$49", Tag: "Accessories"),
+            (Name: "USB-C Hub", Price: "$79", Tag: "Accessories"),
+            (Name: "Monitor 27\"", Price: "$449", Tag: "Electronics"),
+            (Name: "Keyboard", Price: "$129", Tag: "Accessories"),
+            (Name: "Webcam HD", Price: "$89", Tag: "Electronics"),
+        };
+
+        var grid = new Grid(gap: 4);
+        foreach (var p in products)
+        {
+            grid.Add(Daisy.Card(
+                title: p.Name,
+                body: Inlay.Template($"""
+                    <p class="text-2xl font-bold">{p.Price}</p>
+                    {Daisy.Badge(p.Tag, p.Tag == "Electronics" ? BadgeVariant.Primary : BadgeVariant.Secondary)}
+                    """),
+                compact: true,
+                bordered: true), spanSm: 6, spanMd: 4);
+        }
+
+        return grid;
+    }
+
     // ── Shared helpers ────────────────────────────────────────
 
     static InlayTemplate WithSidebar(string title, string activePage, IHtmlContent body)
@@ -530,6 +751,7 @@ public static class ShowcaseTemplates
                 <li><a class="{Inlay.Css(("active", activePage == "FormInputs"))}" href="/Showcase/FormInputs">Inputs</a></li>
                 <li><a class="{Inlay.Css(("active", activePage == "FormControls"))}" href="/Showcase/FormControls">Controls</a></li>
                 <li class="menu-title">Page</li>
+                <li><a class="{Inlay.Css(("active", activePage == "GridLayout"))}" href="/Showcase/GridLayout">Grid Layout</a></li>
                 <li><a class="{Inlay.Css(("active", activePage == "Layouts"))}" href="/Showcase/Layouts">Layouts</a></li>
             </ul>
             """);
