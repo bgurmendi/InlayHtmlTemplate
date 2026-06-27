@@ -1,5 +1,7 @@
+using System.Text.Encodings.Web;
+using Microsoft.AspNetCore.Html;
 
-namespace InlayHtmlTemplate.DaisyUI.Components;
+namespace InlayHtmlTemplate.Components;
 
 public class Field : IHtmlContent
 {
@@ -58,9 +60,9 @@ public class Field : IHtmlContent
         return this;
     }
 
-    public string Render()
+    public void WriteTo(TextWriter writer, HtmlEncoder encoder)
     {
-        InlayHtmlTemplate? errorContent = null;
+        IHtmlContent? errorContent = null;
 
         if (!string.IsNullOrEmpty(_error))
         {
@@ -69,10 +71,10 @@ public class Field : IHtmlContent
             """);
         }
 
-        return Inlay.Template($"""
+        Inlay.Template($"""
         <label>{_label}</label>
         <input type={_type} value={_value} placeholder={_placeholder} name={_name} id={_id} />
         {errorContent}
-        """);
+        """).WriteTo(writer, encoder);
     }
 }
