@@ -736,7 +736,7 @@ public static class ShowcaseTemplates
 
     // ── Shared helpers ────────────────────────────────────────
 
-    static InlayTemplate WithSidebar(string title, string activePage, IHtmlContent body)
+    internal static InlayTemplate WithSidebar(string title, string activePage, IHtmlContent body)
     {
         var sidebar = Inlay.Template($"""
             <div class="text-xl font-bold mb-4 p-2">DaisyUI Showcase</div>
@@ -752,6 +752,7 @@ public static class ShowcaseTemplates
                 <li><a class="{Inlay.Css(("active", activePage == "FormControls"))}" href="/Showcase/FormControls">Controls</a></li>
                 <li class="menu-title">Page</li>
                 <li><a class="{Inlay.Css(("active", activePage == "GridLayout"))}" href="/Showcase/GridLayout">Grid Layout</a></li>
+                <li><a class="{Inlay.Css(("active", activePage == "Contact"))}" href="/Showcase/Contact">Contact Form</a></li>
                 <li><a class="{Inlay.Css(("active", activePage == "Layouts"))}" href="/Showcase/Layouts">Layouts</a></li>
             </ul>
             """);

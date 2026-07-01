@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Html;
@@ -31,6 +34,44 @@ public class Grid : IHtmlContent
         _rows[^1].Add(new GridCell(content, span, spanSm, spanMd, spanLg));
         return this;
     }
+
+    public Grid AddField<TModel>(TModel model, Expression<Func<TModel, string>> expression,
+        int span = 12, int? spanSm = null, int? spanMd = null, int? spanLg = null)
+    {
+        var property = GetProperty(expression);
+        var value = expression.Compile()(model);
+
+        var display = property.GetCustomAttribute<DisplayAttribute>();
+        var dataType = property.GetCustomAttribute<DataTypeAttribute>();
+
+        var field = new Field()
+            .SetName(property.Name)
+            .SetValue(value ?? "")
+            .SetLabel(display?.Name ?? property.Name)
+            .SetPlaceholder(display?.Prompt ?? "")
+            .SetType(MapDataType(dataType));
+
+        return Add(field, span, spanSm, spanMd, spanLg);
+    }
+
+    private static PropertyInfo GetProperty<TModel>(Expression<Func<TModel, string>> expression)
+    {
+        if (expression.Body is MemberExpression member && member.Member is PropertyInfo prop)
+            return prop;
+        throw new ArgumentException("Expression must be a property access.", nameof(expression));
+    }
+
+    private static string MapDataType(DataTypeAttribute? attr) => attr?.DataType switch
+    {
+        DataType.EmailAddress => "email",
+        DataType.PhoneNumber => "tel",
+        DataType.Password => "password",
+        DataType.Url => "url",
+        DataType.Date => "date",
+        DataType.DateTime => "datetime-local",
+        DataType.Time => "time",
+        _ => "text"
+    };
 
     public void WriteTo(TextWriter writer, HtmlEncoder encoder)
     {
