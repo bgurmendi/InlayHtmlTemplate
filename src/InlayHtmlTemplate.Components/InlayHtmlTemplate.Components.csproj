@@ -8,7 +8,7 @@
 
     <!-- NuGet Package Metadata -->
     <PackageId>InlayHtmlTemplate.Components</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>InlayHtmlTemplate Contributors</Authors>
     <Description>Reusable layout components for InlayHtmlTemplate. Provides a responsive 12-column grid system with custom CSS (no Tailwind scanner dependency).</Description>
     <PackageTags>inlay;html;template;grid;layout;components;aspnet</PackageTags>
@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../InlayHtmlTemplate/InlayHtmlTemplate.csproj" />
+    <ProjectReference Include="../InlayHtmlTemplate.DaisyUI/InlayHtmlTemplate.DaisyUI.csproj" />
   </ItemGroup>
 
 </Project>

@@ -8,7 +8,7 @@
 
     <!-- NuGet Package Metadata -->
     <PackageId>InlayHtmlTemplate.DaisyUI</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>InlayHtmlTemplate Contributors</Authors>
     <Description>Reusable DaisyUI component templates for InlayHtmlTemplate. Provides type-safe, composable HTML components (alerts, cards, modals, navbars, etc.) and page layouts using DaisyUI + Tailwind CSS.</Description>
     <PackageTags>inlay;html;template;daisyui;tailwind;components;aspnet</PackageTags>
