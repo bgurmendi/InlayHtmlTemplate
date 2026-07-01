@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Http;
@@ -28,18 +29,25 @@ public sealed class InlayTemplate : IHtmlContent, IActionResult, IResult
     {
         var response = context.HttpContext.Response;
         response.ContentType = "text/html; charset=utf-8";
-        await using var writer = new StreamWriter(response.Body, leaveOpen: true);
-        WriteTo(writer, HtmlEncoder.Default);
-        await writer.FlushAsync();
+        var sb = new StringBuilder();
+        using (var writer = new StringWriter(sb))
+        {
+            WriteTo(writer, HtmlEncoder.Default);
+        }
+        await response.WriteAsync(sb.ToString(), Encoding.UTF8);
     }
 
     /// <inheritdoc/>
     public async Task ExecuteAsync(HttpContext httpContext)
     {
-        httpContext.Response.ContentType = "text/html; charset=utf-8";
-        await using var writer = new StreamWriter(httpContext.Response.Body, leaveOpen: true);
-        WriteTo(writer, HtmlEncoder.Default);
-        await writer.FlushAsync();
+        var response = httpContext.Response;
+        response.ContentType = "text/html; charset=utf-8";
+        var sb = new StringBuilder();
+        using (var writer = new StringWriter(sb))
+        {
+            WriteTo(writer, HtmlEncoder.Default);
+        }
+        await response.WriteAsync(sb.ToString(), Encoding.UTF8);
     }
 
     /// <inheritdoc/>
