@@ -5,8 +5,8 @@ HTML templates for ASP.NET Core using plain C# string interpolation.
 ```csharp
 InlayTemplate RenderCard(User user) =>
     Inlay.Template($"""
-        <div class="{Inlay.Css(("card", true), ("admin", user.IsAdmin))}">
-            <img src="{user.AvatarUrl}" alt="{user.Name}" />
+        <div class={Inlay.Css(("card", true), ("admin", user.IsAdmin))}>
+            <img src={user.AvatarUrl} alt={user.Name} />
             <h2>{user.Name}</h2>
             {Inlay.If(user.IsAdmin, $"""<span class="badge">Admin</span>""")}
             <ul>
@@ -66,6 +66,8 @@ var page = Inlay.Template($"<div>{header}<p>{body}</p></div>");
 
 The engine detects four HTML contexts and handles each accordingly:
 
+Attribute values may be written in either quoted form (`attribute="{value}"`) or unquoted form (`attribute={value}`). Both are valid — the engine detects the context regardless of surrounding quotes. The unquoted form is recommended for clarity, since the `{...}` syntax already delimits the value.
+
 ### Element Content
 ```csharp
 var text = "<b>bold</b>";
@@ -76,14 +78,14 @@ Inlay.Template($"<p>{text}</p>");
 ### Attribute Values
 ```csharp
 var className = """foo" onclick="alert(1)""";
-Inlay.Template($"""<div class="{className}">test</div>""");
+Inlay.Template($"""<div class={className}>test</div>""");
 // Attribute is safely escaped, onclick injection is neutralized
 ```
 
 ### URL Attributes (href, src)
 ```csharp
 var url = "javascript:alert(1)";
-Inlay.Template($"""<a href="{url}">click</a>""");
+Inlay.Template($"""<a href={url}>click</a>""");
 // javascript: URLs are blocked and replaced with #
 ```
 
@@ -98,7 +100,7 @@ Inlay.Template($"""<input type="checkbox" checked={isChecked} />""");
 // Output: <input type="checkbox" />
 ```
 
-The engine recognizes [25 standard HTML boolean attributes](docs/api-reference.md#boolean-attribute-context) and renders them correctly: the attribute appears when the value is truthy, and is omitted entirely when falsy. No manual `Inlay.If` needed — just write `disabled={condition}` and the engine handles it. The quoted form `disabled="{condition}"` also works, but the unquoted form is recommended for clarity.
+The engine recognizes [25 standard HTML boolean attributes](docs/api-reference.md#boolean-attribute-context) and renders them correctly: the attribute appears when the value is truthy, and is omitted entirely when falsy. No manual `Inlay.If` needed — just write `disabled={condition}` and the engine handles it. Both `disabled={condition}` and `disabled="{condition}"` are supported; the unquoted form is recommended for clarity.
 
 ## Template Helpers
 

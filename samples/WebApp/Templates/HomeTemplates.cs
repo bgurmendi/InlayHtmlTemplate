@@ -20,7 +20,7 @@ public static class HomeTemplates
                 <div class="feature-grid">
                     {Inlay.Each(features,
                         f => $"""
-                            <div class="{Inlay.Css(("feature", true), ("highlight", f.IsNew))}">
+                            <div class={Inlay.Css(("feature", true), ("highlight", f.IsNew))}>
                                 <h3>{f.Title}</h3>
                                 <p>{f.Description}</p>
                                 {Inlay.If(f.IsNew, $"""<span class="badge">New</span>""")}
@@ -62,12 +62,12 @@ public static class HomeTemplates
                     <tr>
                         <td>Attribute</td>
                         <td><code>{maliciousClass}</code></td>
-                        <td><span class="{maliciousClass}">safe</span></td>
+                        <td><span class={maliciousClass}>safe</span></td>
                     </tr>
                     <tr>
                         <td>URL</td>
                         <td><code>{maliciousUrl}</code></td>
-                        <td><a href="{maliciousUrl}">blocked link</a></td>
+                        <td><a href={maliciousUrl}>blocked link</a></td>
                     </tr>
                 </tbody>
             </table>

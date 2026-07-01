@@ -120,7 +120,7 @@ HTML boolean attributes (`disabled`, `checked`, `selected`, `required`, `readonl
 InlayTemplate RenderToggle(string name, string label, bool isChecked, bool isDisabled = false) =>
     Inlay.Template($"""
         <label>
-            <input type="checkbox" name="{name}" checked={isChecked} disabled={isDisabled} />
+            <input type="checkbox" name={name} checked={isChecked} disabled={isDisabled} />
             {label}
         </label>
         """);
@@ -132,16 +132,16 @@ var html2 = RenderToggle("sms", "SMS alerts", isChecked: false, isDisabled: true
 // <label><input type="checkbox" name="sms" disabled /> SMS alerts</label>
 ```
 
-Both `disabled={value}` and `disabled="{value}"` are supported. The unquoted form is recommended for clarity — it makes it obvious that the value controls the attribute's presence, not its content.
+Both `disabled={value}` and `disabled="{value}"` are supported. The unquoted form is recommended for clarity — it makes it obvious that the value controls the attribute's presence, not its content. This applies to all attributes, not just booleans — `attribute={value}` and `attribute="{value}"` are both valid.
 
 This is especially useful in reusable components — you can forward boolean parameters directly into the template without wrapping them in `Inlay.If`:
 
 ```csharp
 InlayTemplate RenderSelect(string name, IEnumerable<(string Value, string Label, bool Selected)> options) =>
     Inlay.Template($"""
-        <select name="{name}">
+        <select name={name}>
             {Inlay.Each(options, o =>
-                $"""<option value="{o.Value}" selected={o.Selected}>{o.Label}</option>""")}
+                $"""<option value={o.Value} selected={o.Selected}>{o.Label}</option>""")}
         </select>
         """);
 ```
@@ -168,13 +168,13 @@ var isDisabled = false;
 var hasError = true;
 
 var html = Inlay.Template(
-    $"""<button class="{Inlay.Css(
+    $"""<button class={Inlay.Css(
+
         ("btn", true),
         ("btn-primary", isActive),
         ("btn-disabled", isDisabled),
         ("btn-error", hasError)
-    )}">Submit</button>""");
-
+    )}>Submit</button>""");
 // <button class="btn btn-primary btn-error">Submit</button>
 ```
 
@@ -189,7 +189,7 @@ var tab = "settings";
 var currentTab = "settings";
 
 var html = Inlay.Template(
-    $"""<li class="{Inlay.Css(("nav-link", true), ("active", tab == currentTab))}">{tab}</li>""");
+    $"""<li class={Inlay.Css(("nav-link", true), ("active", tab == currentTab))}>{tab}</li>""");
 ```
 
 State-driven styling:
@@ -198,12 +198,12 @@ State-driven styling:
 var status = OrderStatus.Shipped;
 
 var html = Inlay.Template(
-    $"""<span class="{Inlay.Css(
+    $"""<span class={Inlay.Css(
         ("badge", true),
         ("badge-warning", status == OrderStatus.Pending),
         ("badge-info", status == OrderStatus.Shipped),
         ("badge-success", status == OrderStatus.Delivered)
-    )}">{status}</span>""");
+    )}>{status}</span>""");
 ```
 
 
@@ -250,7 +250,7 @@ var html = Inlay.Template($"""
         <tbody>
             {Inlay.Each(products, p => $"""
                 <tr>
-                    <td><a href="{p.Url}">{p.Name}</a></td>
+                    <td><a href={p.Url}>{p.Name}</a></td>
                     <td>${p.Price}</td>
                 </tr>
             """)}
@@ -268,7 +268,7 @@ var steps = new[] { "Mix ingredients", "Preheat oven", "Bake 25 min" };
 
 var html = Inlay.Template(
     $"<ol>{Inlay.Each(steps, (step, i) =>
-        $"""<li class="{Inlay.Css(("step", true), ("even", i % 2 == 0))}">{step}</li>""")}</ol>");
+        $"""<li class={Inlay.Css(("step", true), ("even", i % 2 == 0))}>{step}</li>""")}</ol>");
 ```
 
 
@@ -312,7 +312,7 @@ var html = Inlay.Template($"""
     <div class="task-list">
         {Inlay.Each(tasks,
             t => $"""
-                <div class="{Inlay.Css(("task", true), ("done", t.Done))}">
+                <div class={Inlay.Css(("task", true), ("done", t.Done))}>
                     {Inlay.If(t.Done,
                         $"<s>{t.Title}</s>",
                         $"<span>{t.Title}</span>")}
@@ -366,8 +366,8 @@ InlayTemplate ProductPage(IEnumerable<Product> products, string? search)
 
         <div class="product-grid">
             {Inlay.Each(products, p => $"""
-                <div class="{Inlay.Css(("product", true), ("out-of-stock", !p.InStock))}">
-                    <img src="{p.ImageUrl}" alt="{p.Name}" />
+                <div class={Inlay.Css(("product", true), ("out-of-stock", !p.InStock))}>
+                    <img src={p.ImageUrl} alt={p.Name} />
                     <h3>{p.Name}</h3>
                     <span class="price">${p.Price}</span>
                     {Inlay.If(p.InStock,
@@ -443,8 +443,8 @@ InlayTemplate RenderDashboard(User user, IEnumerable<Activity> activities)
 
     return Inlay.Template($"""
         <div class="dashboard">
-            <header class="{Inlay.Css(("header", true), ("header-admin", isAdmin))}">
-                <img src="{user.AvatarUrl}" alt="{user.Name}" />
+            <header class={Inlay.Css(("header", true), ("header-admin", isAdmin))}>
+                <img src={user.AvatarUrl} alt={user.Name} />
                 <h1>{user.Name}</h1>
                 {Inlay.If(isAdmin, $"""<span class="role-badge">Admin</span>""")}
             </header>
@@ -454,7 +454,7 @@ InlayTemplate RenderDashboard(User user, IEnumerable<Activity> activities)
                 <ul>
                     {Inlay.Each(activities,
                         a => $"""
-                            <li class="{Inlay.Css(("activity-item", true), ("unread", !a.IsRead))}">
+                            <li class={Inlay.Css(("activity-item", true), ("unread", !a.IsRead))}>
                                 <span>{a.Description}</span>
                                 <time>{a.When:yyyy-MM-dd}</time>
                             </li>

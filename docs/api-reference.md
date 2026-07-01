@@ -106,9 +106,9 @@ Represents the HTML context where an interpolated value appears.
 | Value              | Description                                          | Behavior                          |
 |--------------------|------------------------------------------------------|-----------------------------------|
 | `Content`          | Inside element content (`<p>{value}</p>`)            | `HtmlEncode`                      |
-| `Attribute`        | Inside an attribute (`class="{value}"`)              | `HtmlEncode` + quote escaping     |
-| `UrlAttribute`     | Inside `href` or `src` (`href="{value}"`)            | `UrlEncode` + `javascript:` block |
-| `BooleanAttribute` | Inside a boolean attribute (`disabled="{value}"`)    | Attribute rendered or omitted     |
+| `Attribute`        | Inside an attribute (`class={value}`)                | `HtmlEncode` + quote escaping     |
+| `UrlAttribute`     | Inside `href` or `src` (`href={value}`)              | `UrlEncode` + `javascript:` block |
+| `BooleanAttribute` | Inside a boolean attribute (`disabled={value}`)      | Attribute rendered or omitted     |
 | `Script`           | Inside a `<script>` tag (reserved for future use)    | `HtmlEncode` (default)            |
 
 ## HtmlContextAnalyzer
@@ -171,7 +171,7 @@ Inlay.Template($"""<input type="text" disabled="{isDisabled}" />""");
 Inlay.Template($"""<input type="checkbox" checked={isChecked} disabled={isDisabled} />""");
 
 // Non-boolean attributes like name, class, type are unaffected
-Inlay.Template($"""<input type="text" name="{name}" disabled={isDisabled} class="{css}" />""");
+Inlay.Template($"""<input type="text" name={name} disabled={isDisabled} class={css} />""");
 ```
 
 ### IHtmlContent Bypass

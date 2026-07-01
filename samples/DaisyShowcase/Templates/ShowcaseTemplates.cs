@@ -741,19 +741,19 @@ public static class ShowcaseTemplates
         var sidebar = Inlay.Template($"""
             <div class="text-xl font-bold mb-4 p-2">DaisyUI Showcase</div>
             <ul class="menu">
-                <li><a class="{Inlay.Css(("active", activePage == "Index"))}" href="/">Home</a></li>
+                <li><a class={Inlay.Css(("active", activePage == "Index"))} href="/">Home</a></li>
                 <li class="menu-title">Components</li>
-                <li><a class="{Inlay.Css(("active", activePage == "Feedback"))}" href="/Showcase/Feedback">Feedback</a></li>
-                <li><a class="{Inlay.Css(("active", activePage == "Actions"))}" href="/Showcase/Actions">Actions</a></li>
-                <li><a class="{Inlay.Css(("active", activePage == "DataDisplay"))}" href="/Showcase/DataDisplay">Data Display</a></li>
-                <li><a class="{Inlay.Css(("active", activePage == "Navigation"))}" href="/Showcase/Navigation">Navigation</a></li>
+                <li><a class={Inlay.Css(("active", activePage == "Feedback"))} href="/Showcase/Feedback">Feedback</a></li>
+                <li><a class={Inlay.Css(("active", activePage == "Actions"))} href="/Showcase/Actions">Actions</a></li>
+                <li><a class={Inlay.Css(("active", activePage == "DataDisplay"))} href="/Showcase/DataDisplay">Data Display</a></li>
+                <li><a class={Inlay.Css(("active", activePage == "Navigation"))} href="/Showcase/Navigation">Navigation</a></li>
                 <li class="menu-title">Forms</li>
-                <li><a class="{Inlay.Css(("active", activePage == "FormInputs"))}" href="/Showcase/FormInputs">Inputs</a></li>
-                <li><a class="{Inlay.Css(("active", activePage == "FormControls"))}" href="/Showcase/FormControls">Controls</a></li>
+                <li><a class={Inlay.Css(("active", activePage == "FormInputs"))} href="/Showcase/FormInputs">Inputs</a></li>
+                <li><a class={Inlay.Css(("active", activePage == "FormControls"))} href="/Showcase/FormControls">Controls</a></li>
                 <li class="menu-title">Page</li>
-                <li><a class="{Inlay.Css(("active", activePage == "GridLayout"))}" href="/Showcase/GridLayout">Grid Layout</a></li>
-                <li><a class="{Inlay.Css(("active", activePage == "Contact"))}" href="/Showcase/Contact">Contact Form</a></li>
-                <li><a class="{Inlay.Css(("active", activePage == "Layouts"))}" href="/Showcase/Layouts">Layouts</a></li>
+                <li><a class={Inlay.Css(("active", activePage == "GridLayout"))} href="/Showcase/GridLayout">Grid Layout</a></li>
+                <li><a class={Inlay.Css(("active", activePage == "Contact"))} href="/Showcase/Contact">Contact Form</a></li>
+                <li><a class={Inlay.Css(("active", activePage == "Layouts"))} href="/Showcase/Layouts">Layouts</a></li>
             </ul>
             """);
 

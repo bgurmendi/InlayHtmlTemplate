@@ -40,10 +40,10 @@ var website = user.Website;  // "https://alice.dev"
 
 var html = Inlay.Template($"""
     <div class="profile-card">
-        <img src="{avatar}" alt="{name}" />
+        <img src={avatar} alt={name} />
         <h2>{name}</h2>
         <p>{bio}</p>
-        <a href="{website}">Website</a>
+        <a href={website}>Website</a>
     </div>
     """);
 ```
@@ -86,7 +86,7 @@ InlayTemplate RenderTable(IEnumerable<User> users) =>
                 {Inlay.Each(users, u => $"""
                     <tr>
                         <td>{u.Name}</td>
-                        <td><a href="mailto:{u.Email}">{u.Email}</a></td>
+                        <td><a href=mailto:{u.Email}>{u.Email}</a></td>
                         <td>{u.Role}</td>
                     </tr>
                 """)}
@@ -102,8 +102,8 @@ Boolean HTML attributes like `disabled`, `checked`, `selected`, and `required` a
 ```csharp
 InlayTemplate RenderForm(string action, string csrfToken, bool isSubmitting) =>
     Inlay.Template($"""
-        <form method="post" action="{action}">
-            <input type="hidden" name="__RequestVerificationToken" value="{csrfToken}" />
+        <form method="post" action={action}>
+            <input type="hidden" name="__RequestVerificationToken" value={csrfToken} />
             <label for="name">Name:</label>
             <input type="text" id="name" name="name" required={true} />
             <label>
@@ -120,7 +120,7 @@ InlayTemplate RenderForm(string action, string csrfToken, bool isSubmitting) =>
 //   <button type="submit" disabled>Submit</button>
 ```
 
-The quoted form `disabled="{isSubmitting}"` also works, but the unquoted form is recommended — it makes it clearer that the value controls the attribute's presence, not its content.
+Both `disabled={isSubmitting}` and `disabled="{isSubmitting}"` are supported. The unquoted form is recommended — it makes it clearer that the value controls the attribute's presence, not its content.
 
 This works with any of the 25 standard boolean attributes (`disabled`, `checked`, `selected`, `required`, `readonly`, `hidden`, `open`, `autofocus`, `multiple`, etc.). Non-boolean attributes like `name`, `class`, and `type` continue to render their values normally.
 

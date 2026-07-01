@@ -40,7 +40,7 @@ public static class LayoutTemplate
     static IHtmlContent NavLink(string label, string href, string? activeNav) =>
         Inlay.Template($"""
             <li>
-                <a class="{Inlay.Css(("nav-link", true), ("active", label == activeNav))}" href="{href}">{label}</a>
+                <a class={Inlay.Css(("nav-link", true), ("active", label == activeNav))} href={href}>{label}</a>
             </li>
             """);
 }
