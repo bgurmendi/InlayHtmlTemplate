@@ -163,4 +163,50 @@ public class SimpleHtmlTemplateTests
         Assert.Contains("before", result);
         Assert.Contains("after", result);
     }
+
+    // --- URL query string & security ---
+
+    [Fact]
+    public void Render_UrlAttribute_QueryStringPreserved()
+    {
+        var val = "day";
+        var url = val != null ? $"?period={val}" : "";
+        var result = Inlay.Template($"""<a href="/Admin/InvoiceStats{url}">link</a>""").ToString();
+
+        Assert.Contains("?period=day", result);
+        Assert.DoesNotContain("%3F", result);
+        Assert.DoesNotContain("%3D", result);
+    }
+
+    [Fact]
+    public void Render_UrlAttribute_MaliciousInjection_Safe()
+    {
+        var malicious = """/" onclick="codigo js"><!-- -->""";
+        var result = Inlay.Template($"""<a href="/page{malicious}">link</a>""").ToString();
+
+        Assert.DoesNotContain(" onclick", result);
+        Assert.DoesNotContain("<!--", result);
+        Assert.Contains("&quot;", result);
+    }
+
+    [Fact]
+    public void Render_UrlAttribute_Unquoted_MaliciousSpace_Safe()
+    {
+        var malicious = "# onclick=alert(1)";
+        var result = Inlay.Template($"""<a href={malicious}>link</a>""").ToString();
+
+        Assert.DoesNotContain(" onclick", result);
+        Assert.Contains("%20", result);
+    }
+
+    [Fact]
+    public void Render_UrlAttribute_Unquoted_SafeUrl_Encoded()
+    {
+        var url = "/search?q=hello world";
+        var result = Inlay.Template($"""<a href={url}>link</a>""").ToString();
+
+        Assert.Contains("%20", result);
+        Assert.Contains("/search", result);
+        Assert.Contains("?q=", result);
+    }
 }
