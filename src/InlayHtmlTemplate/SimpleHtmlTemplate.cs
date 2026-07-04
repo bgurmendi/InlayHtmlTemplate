@@ -45,9 +45,14 @@ public class SimpleHtmlTemplate
                 break;
             case HtmlContext.UrlAttribute:
                 if (value.StartsWith("javascript:", StringComparison.OrdinalIgnoreCase))
+                {
                     writer.Write('#');
-                else
-                    UrlEncoder.Default.Encode(writer, value);
+                    return;
+                }
+                var encoded = encoder.Encode(value);
+                if (encoded.Contains(' '))
+                    encoded = encoded.Replace(" ", "%20");
+                writer.Write(encoded);
                 break;
             default:
                 encoder.Encode(writer, value);
