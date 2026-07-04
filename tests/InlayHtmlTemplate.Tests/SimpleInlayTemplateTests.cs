@@ -131,8 +131,11 @@ public class SimpleHtmlTemplateTests
         var url = "/search?q=hello world";
         var result = Inlay.Template($"""<a href="{url}">link</a>""").ToString();
 
+        Assert.Contains("/search", result);
+        Assert.Contains("?q=", result);
         Assert.Contains("%20", result);
-        Assert.Contains("%2F", result);
+        Assert.DoesNotContain("%2F", result);
+        Assert.DoesNotContain("%3F", result);
     }
 
     [Fact]
@@ -208,5 +211,26 @@ public class SimpleHtmlTemplateTests
         Assert.Contains("%20", result);
         Assert.Contains("/search", result);
         Assert.Contains("?q=", result);
+    }
+
+    [Fact]
+    public void Render_UrlAttribute_WithLiteralPrefix_Encoded()
+    {
+        var url = "/search?q=hello world";
+        var result = Inlay.Template($"""<a href="base/{url}">link</a>""").ToString();
+
+        Assert.Contains("href=\"base//search?q=hello%20world", result);
+        Assert.DoesNotContain("%2F", result);
+        Assert.DoesNotContain("%3F", result);
+    }
+
+    [Fact]
+    public void Render_UrlAttribute_MaliciousBase_Encoded()
+    {
+        var base_ = "\"";
+        var url = "/search?q=hello world";
+        var result = Inlay.Template($"""<a href="{base_}{url}">link</a>""").ToString();
+
+        Assert.Contains("href=\"&quot;/search?q=hello%20world", result);
     }
 }
