@@ -8,7 +8,7 @@
 
     <!-- NuGet Package Metadata -->
     <PackageId>InlayHtmlTemplate.Components</PackageId>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <Authors>InlayHtmlTemplate Contributors</Authors>
     <Description>Reusable layout components for InlayHtmlTemplate. Provides a responsive 12-column grid system with custom CSS (no Tailwind scanner dependency).</Description>
     <PackageTags>inlay;html;template;grid;layout;components;aspnet</PackageTags>
