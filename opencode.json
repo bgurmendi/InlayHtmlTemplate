@@ -1,0 +1,66 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["AGENTS.md"],
+  "mcp": {
+    "local-rag": {
+      "type": "local",
+      "enabled": true,
+      "command": ["npx", "-y", "mcp-local-rag"],
+      "environment": {
+        "BASE_DIR": ".",
+        "DB_PATH": ".opencode/rag-db",
+        "CACHE_DIR": ".opencode/models"
+      }
+    },
+    // dotnet tool install --global csharp-ls
+    // csharp-ls --help
+    "lsp": {
+      "type": "local",
+      "enabled": true,
+      "command": [
+        "npx",
+        "-y",
+        "mcp-language-server",
+        "--workspace",
+        ".",
+        "--language-server",
+        "csharp-ls"
+      ],
+      "environment": {
+        "OPERATE_BASE_URL": "."
+      }
+    },
+    "chrome-devtools": {
+      "type": "local",
+      "enabled": true,
+      "command": ["npx", "-y", "chrome-devtools-mcp@latest"]
+    },
+    "playwright": {
+      "type": "local",
+      "enabled": true,
+      "command": ["npx", "@playwright/mcp@latest"]
+    },
+    "git": {
+      "type": "local",
+      "enabled": true,
+      "command": ["uvx", "mcp-server-git", "--repository", "."]
+    },
+    "sharplens": {
+      "type": "local",
+      "enabled": true,
+      "command": ["sharplens"],
+      "environment": {
+        "DOTNET_SOLUTION_PATH": "/home/bgur/proy2026/StripeVerifactu/TU_SOLUCION.sln"
+      }
+    },
+    "context7": {
+      "type": "local",
+      "command": ["npx", "-y", "@upstash/context7-mcp@latest"]
+    },
+    "daisyui-docs": {
+      "type": "remote",
+      "url": "https://gitmcp.io/saadeghi/daisyui",
+      "enabled": true
+    }
+  }
+}
