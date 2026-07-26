@@ -50,7 +50,7 @@
       "enabled": true,
       "command": ["sharplens"],
       "environment": {
-        "DOTNET_SOLUTION_PATH": "/home/bgur/proy2026/StripeVerifactu/TU_SOLUCION.sln"
+        "DOTNET_SOLUTION_PATH": "./InlayHtmlTemplate.sln"
       }
     },
     "context7": {
