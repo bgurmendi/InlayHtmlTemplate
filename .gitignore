@@ -47,3 +47,4 @@ coverage/
 
 ## Stryker mutation reports
 **/StrykerOutput/
+/.opencode/rag-db/

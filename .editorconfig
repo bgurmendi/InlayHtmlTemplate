@@ -1,0 +1,58 @@
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{csproj,projitems,props,targets,xml,config,json}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.sh]
+end_of_line = lf
+
+# .NET naming conventions
+[*.cs]
+
+# Types, methods, properties, events, namespaces → PascalCase
+dotnet_naming_rule.types_and_namespaces.rule = pascal_case
+dotnet_naming_rule.types_and_namespaces.symbols = types_and_namespaces
+dotnet_naming_symbols.types_and_namespaces.applicable_kinds = class, struct, interface, enum, delegate, namespace, record
+dotnet_naming_rule.types_and_namespaces.style = pascal_case_style
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+
+dotnet_naming_rule.members.rule = pascal_case
+dotnet_naming_rule.members.symbols = members
+dotnet_naming_symbols.members.applicable_kinds = method, property, event, constant, enum_member
+dotnet_naming_rule.members.style = pascal_case_style
+
+# Parameters and locals → camelCase
+dotnet_naming_rule.parameters_and_locals.rule = camel_case
+dotnet_naming_rule.parameters_and_locals.symbols = parameters_and_locals
+dotnet_naming_symbols.parameters_and_locals.applicable_kinds = parameter, local
+dotnet_naming_rule.parameters_and_locals.style = camel_case_style
+dotnet_naming_style.camel_case_style.capitalization = camel_case
+
+# Private fields → _camelCase
+dotnet_naming_rule.private_fields.rule = camel_case_with_underscore
+dotnet_naming_rule.private_fields.symbols = private_fields
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.required_modifiers = private
+dotnet_naming_rule.private_fields.style = camel_case_with_underscore_style
+dotnet_naming_style.camel_case_with_underscore_style.capitalization = camel_case
+dotnet_naming_style.camel_case_with_underscore_style.required_prefix = _
+
+# Suppress missing doc warnings
+dotnet_diagnostic.CS1591.severity = none
+
+# Security analyzer warnings
+dotnet_analyzer_diagnostic.category-Security.severity = warning
+
+# CA1822: Member does not access instance data → suggestion
+dotnet_diagnostic.CA1822.severity = suggestion

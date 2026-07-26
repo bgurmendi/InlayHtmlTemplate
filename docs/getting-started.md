@@ -83,9 +83,21 @@ app.MapGet("/", (HttpContext ctx) =>
 app.Run();
 ```
 
+## Recommended Global Usings
+
+Add these to your `GlobalUsings.cs` or `_Imports.cs` for the most ergonomic experience:
+
+```csharp
+global using InlayHtmlTemplate;
+global using static InlayHtmlTemplate.Inlay;
+```
+
+With these, every source file has access to `Template(...)`, `If(...)`, `Each(...)`, `Css(...)`, and `Raw(...)` without additional imports.
+
 ## Next Steps
 
 - Read the [API Reference](api-reference.md) for details on all contexts and behaviors
 - Check out the [Examples](examples.md) for common patterns
 - See the [Advanced Examples](advanced-examples.md) for conditionals, lists, and composition
+- [Migrate from Razor](migration-guide.md) if coming from ASP.NET Core MVC views
 - Look at the `samples/WebApp` project for a full ASP.NET Core MVC integration
