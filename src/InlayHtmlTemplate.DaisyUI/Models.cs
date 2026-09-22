@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace InlayHtmlTemplate.DaisyUI;
 
 public record StatItem(string Title, string Value, string? Description = null);

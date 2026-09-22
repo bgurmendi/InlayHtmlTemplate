@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Html;
 
 namespace InlayHtmlTemplate.DaisyUI;
