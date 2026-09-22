@@ -1,10 +1,17 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Html;
+
 
 namespace InlayHtmlTemplate;
 
 /// <summary>
 /// Helper methods for composing HTML templates: conditionals, class toggling, and list iteration.
+/// TODO: Valorar si se puede sustituir por Microsoft.AspNetCore.Html.Abstractions.HtmlFormattableString y Microsoft.AspNetCore.Html.Abstractions.IHtmlContent
 /// </summary>
 public static class Inlay
 {
@@ -12,7 +19,9 @@ public static class Inlay
     /// Creates a deferred HTML template with context-aware escaping.
     /// Returns InlayTemplate which implements IHtmlContent (for composition) and IActionResult (for controllers).
     /// </summary>
-    public static InlayTemplate Template(FormattableString formattable)
+    /// 
+    /// 
+    public static InlayTemplate Template([StringSyntax("Html")]  FormattableString formattable)
         => new InlayTemplate(formattable);
 
     /// <summary>
@@ -32,7 +41,7 @@ public static class Inlay
     /// <summary>
     /// Renders content when the condition is true, or the fallback when false.
     /// </summary>
-    public static IHtmlContent If(bool condition, FormattableString content, FormattableString fallback)
+    public static IHtmlContent If(bool condition,[StringSyntax("Html")] FormattableString content,[StringSyntax("Html")] FormattableString fallback)
     {
         return new InlayTemplate(condition ? content : fallback);
     }
@@ -96,7 +105,7 @@ public static class Inlay
     /// Renders a template for each item with its index, or fallback content if empty.
     /// </summary>
     public static IHtmlContent Each<T>(IEnumerable<T> items, Func<T, int, FormattableString> template,
-                                       FormattableString empty)
+                                       [StringSyntax("Html")] FormattableString empty)
     {
         return new DeferredHtml((writer, encoder) =>
         {
